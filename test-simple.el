@@ -2,14 +2,10 @@
 ;; adapted from Phil Hagelberg's behave.el by rocky
 ;; See also Christian Ohler's ert http://github.com/ohler/ert
 
-;; Copyright (C) 2007 Phil Hagelberg
 ;; Copyright (C) 2010, 2012 Rocky Bernstein
 
-;; Author: Phil Hagelberg
 ;; Author: Rocky Bernstein
-;; Created: 19 Jan 2007
-;; Version: 0.01
-;; URL: http://github.com/rocky/emacs-test-unit
+;; URL: http://github.com/rocky/emacs-test-simple
 ;; Keywords: unit-test specification specs
 
 ;; This file is NOT part of GNU Emacs.
@@ -35,31 +31,21 @@
 
 ;;; Commentary:
 
-;; test-simple.el allows you to unit tests for your Emacs Lisp
+;; test-simple.el allows you to write tests for your Emacs Lisp
 ;; code. Executable specifications allow you to check that your code
 ;; is working correctly in an automated fashion that you can use to
 ;; drive the focus of your development. (It's related to Test-Driven
 ;; Development.) You can read up on it at http://behaviour-driven.org.
 
-;; Specifications and contexts both must have docstrings so that when
-;; the specifications aren't met it is easy to see what caused the
-;; failure.  Each specification should live within a context. In each
-;; context, you can set up relevant things to test, such as necessary
-;; buffers or data structures. (Be sure to use lexical-let for setting
-;; up the variables you need--since the specify macro uses lambdas,
-;; closures will be made for those variables.) Everything within the
-;; context is executed normally.
+;; Assertions may have docstrings so that when the specifications
+;; aren't met it is easy to see what caused the failure.  
 
-;; Each context can be tagged with the TAG form. This allows you to
-;; group your contexts by tags. When you execute the specs, M-x test-unit
-;; will ask you to give some tags, and it will execute all contexts
-;; that match those tags.
+;; When "note" is used subsequent tests are grouped assumed to be
+;; related to that not.
 
-;; When you want to run the specs, evaluate them and press M-x
-;; test-simple. Enter the tags you want to run (or "all"), and they will be
-;; executed with results in the *test-simple* buffer. You can also do M-x
-;; specifications to show a list of all the specified behaviours of
-;; the code.
+;; When you want to run the specs, evaluate the buffer. Or evaluate
+;; individual assertions. Results are save in the
+;; *test-simple* buffer. 
 
 ;;; Implementation
 
@@ -80,12 +66,9 @@
 
 ;;; Usage:
 
-;; See meta.el for specifications for test-simple.el. Evaluate meta.el and
-;; M-x specifications meta RET to see the specifications explained.
-;;; Code:
-
 (make-variable-buffer-local (defvar spec-count))
 (make-variable-buffer-local (defvar spec-desc))
+(make-variable-buffer-local (defvar test-simple-failures nil))
 
 (eval-when-compile 
   (byte-compile-disable-warning 'cl-functions)
@@ -103,6 +86,9 @@
 
 (make-variable-buffer-local
  (defvar *test-simple-default-tags* "all"))
+
+(defvar test-simple-debug-on-error nil
+  "If non-nil raise an error on the first failure")
 
 (make-variable-buffer-local
  (defvar *test-simple-total-assertions* 0
@@ -123,20 +109,8 @@
 
 (defun note (description)
   "Defines a context for specifications to run in."
-  (lexical-let ((context (make-context)))
-    (setf (context-description context) description)
-    (add-to-list '*test-simple-contexts* context)))
-
-(defmacro specify (description &rest body)
-  "Add a specification and its description to the current context."
-  `(push (lambda () ,description 
-	   (let ((spec-desc ,description)) 
-	     ,@body)) (context-specs context)))
-
-(defmacro tag (&rest tags)
-  "Give a context tags for easy reference. (Must be used within a context.)"
-  `(setf (context-tags context) 
-	 (append '(,@tags) (context-tags context))))
+  (setf (context-description context) description)
+  (add-to-list '*test-simple-contexts* context))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Assertion tests
@@ -187,11 +161,8 @@
 	      (if (boundp 'context)
 		  (context-description context)
 		"unset")))
-	(signal 'test-simple-spec-failed 
-		(format 
-		 "Context: %s%s\n" 
-		 context-mess fail-message))))
-  t)
+	(add-failure "assert-nil" context-mess fail-message))
+    t))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Context-management
@@ -204,21 +175,33 @@
   (make-variable-buffer-local (defvar context (make-context)))
   (setf (context-description context) "no description set")
   (setf (context-specs context) '())
+  (with-current-buffer (get-buffer-create "*test-simple*")
+    (let ((old-read-only inhibit-read-only))
+      (setq inhibit-read-only 't)
+      (delete-region (point-min) (point-max))
+      (setq inhibit-read-only old-read-only)))
   (message "Test-Simple: contexts cleared"))
 
-(defun context-find (description)
-  "Find a context by its description."
-  (find description *test-simple-contexts* 
-	:test (lambda (description context) (equal description (context-description context)))))
-
-(defun context-find-by-tag (tag)
-  (remove-if (lambda (context) (not (find tag (context-tags context))))
-	     *test-simple-contexts*))
-
-(defun context-find-by-tags (tags)
-  (if (find 'all tags)
-      *test-simple-contexts*
-    (delete nil (remove-duplicates (mapcan 'context-find-by-tag tags)))))
+(defun add-failure(type context-msg fail-msg)
+  (let ((failure-line
+	 (format "Context: %s, type %s %s" context-msg type fail-msg))
+	(old-read-only inhibit-read-only)
+	)
+    (save-excursion
+      (princ "F")
+      (switch-to-buffer "*test-simple*")
+      (setq inhibit-read-only 't)
+      (insert (concat failure-line "\n"))
+      (overlay-put (make-overlay (point) (- (point) 1)) 
+		   'face '(foreground-color . "red"))
+      (add-to-list 'test-simple-failures failure-line)
+      (setq inhibit-read-only old-read-only)
+      (switch-to-buffer nil))
+    (unless noninteractive
+      (if test-simple-debug-on-error
+	  (signal 'test-simple-assert-failed failure-line)
+	(message failure-line)
+	))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Execution
@@ -237,12 +220,12 @@
       (princ (concat "Running specs tagged \"" tags-string "\":\n\n"))
       (dolist (context (context-find-by-tags (mapcar 'intern (split-string tags-string " "))))
 	(execute-context context))
-      (test-simple-describe-failures failures start-time))
+      (test-simple-describe-failures test-simple-failures start-time))
     (if noninteractive 
 	(progn 
 	  (switch-to-buffer "*test-simple*")
 	  (message "%s" (buffer-substring (point-min) (point-max)))))
-    (length failures)))
+    (length test-simple-failures)))
 
 (defun execute-context (context)
   (condition-case failure
@@ -268,7 +251,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun test-simple-describe-failures (failures start-time)
-  (princ (concat "\n\n" (number-to-string (length failures)) " problem" (unless (= 1 (length failures)) "s") " in " 
+  (princ (concat "\n\n" (number-to-string (length failures)) " problem" 
+		 (unless (= 1 (length failures)) "s") " in " 
 		 (number-to-string spec-count)
 		 " specification" (unless (= 1 spec-count) "s") 
 		 " using " (number-to-string *test-simple-total-assertions*) " assertions. "
@@ -279,20 +263,6 @@
 (defun test-simple-report-result (failure)
   (princ failure)
   (princ "\n\n"))
-
-(defun specifications (&optional tags)
-  "Show specifications for all contexts that match given tags"
-  (interactive)
-  (let ((tags-string (or tags (read-string (concat "Show specs matching these tags (default " *test-simple-default-tags* "): ")
-					   nil nil *test-simple-default-tags*))))
-    (with-output-to-temp-buffer "*test-simple*"
-      (princ "Specifications:\n")
-      (mapcar #'specify-context (context-find-by-tags (mapcar 'intern (split-string tags-string " ")))))))
-
-(defun specify-context (context)
-  (princ (concat "\n" (context-description context) "...\n"))
-  (dolist (spec (context-specs context))
-    (princ (concat " * " (caddr spec) "\n"))))
 
 (provide 'test-simple)
 ;;; test-simple.el ends here
