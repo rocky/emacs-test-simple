@@ -1,0 +1,9 @@
+_test-unit.el_ allows you to create unit tests for your Emacs Lisp code. Executable specifications allow you to check that your code is working correctly in an automated fashion that you can use to drive the focus of your development. (It's related to Test-Driven Development.) You can read up on it at the "Behavior-Driven Development Wiki":http://behaviour-driven.org.
+
+Specifications and contexts both must have docstrings so that when the specifications aren't met it is easy to see what caused the failure.  Each specification should live within a context. In each context, you can set up relevant things to test, such as necessary buffers or data structures. (Be sure to use lexical-let for setting up the variables you need--since the specify macro uses lambdas, closures will be made for those variables.) Everything within the context is executed normally.
+
+Each context can be tagged with the @tag@ form. This allows you to group your contexts by tags. When you execute the specs, M-x test-unit will ask you to give some tags, and it will execute all contexts that match those tags.
+
+When you want to run the specs, evaluate them and press @M-x@ @test-unit@. Enter the tags you want to run (or "all"), and they will be executed with results in the @*test-unit*@ buffer. You can also do @M-x@  specifications to show a list of all the specified behaviors of the code.
+
+See also Christian Ohler's "ert":http://github.com/ohler/ert.
