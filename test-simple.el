@@ -1,12 +1,12 @@
 ;;; test-simple.el --- Simple Unit Test Framework for Emacs Lisp 
-;; adapted from Phil Hagelberg's behave.el by rocky
+;; Totally rewritten from Phil Hagelberg's behave.el by rocky
 ;; See also Christian Ohler's ert http://github.com/ohler/ert
 
 ;; Copyright (C) 2010, 2012 Rocky Bernstein
 
 ;; Author: Rocky Bernstein
 ;; URL: http://github.com/rocky/emacs-test-simple
-;; Keywords: unit-test specification specs
+;; Keywords: unit-test 
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -66,26 +66,15 @@
 
 ;;; Usage:
 
-(make-variable-buffer-local (defvar spec-count))
-(make-variable-buffer-local (defvar spec-desc))
-(make-variable-buffer-local (defvar test-simple-failures nil))
-
-(eval-when-compile 
-  (byte-compile-disable-warning 'cl-functions)
-  ;; Somehow disabling cl-functions causes the erroneous message:
-  ;;   Warning: the function `reduce' might not be defined at runtime.
-  ;; FIXME: isolate, fix and/or report back to Emacs developers a bug
-  (byte-compile-disable-warning 'unresolved)
-  (require 'cl)
-  )
+;; (eval-when-compile 
+;;   (byte-compile-disable-warning 'cl-functions)
+;;   ;; Somehow disabling cl-functions causes the erroneous message:
+;;   ;;   Warning: the function `reduce' might not be defined at runtime.
+;;   ;; FIXME: isolate, fix and/or report back to Emacs developers a bug
+;;   (byte-compile-disable-warning 'unresolved)
+;;   (require 'cl)
+;;   )
 (require 'cl)
-
-(make-variable-buffer-local 
- (defvar *test-simple-contexts* '()
-   "A list of contexts and their specs."))
-
-(make-variable-buffer-local
- (defvar *test-simple-default-tags* "all"))
 
 (defvar test-simple-debug-on-error nil
   "If non-nil raise an error on the first failure")
@@ -96,21 +85,39 @@
   ))
 
 (defstruct context 
-  description
-  tags 
-  (specs '()) ;; list of its specifications stored as closures.
-  refreshing-vars)
-
-(put 'test-simple-spec-failed 'error-conditions '(failure))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Core Macros
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  description    ;; description of last group of tests
+  assert-count   ;; total number of assertions run 
+  failure-count  ;; total number of failures seen
+  start-time     ;; Time run started
+  )
 
 (defun note (description)
-  "Defines a context for specifications to run in."
-  (setf (context-description context) description)
-  (add-to-list '*test-simple-contexts* context))
+  "Adds a name to a group of tests."
+  (setf (context-description context) description))
+
+(defun test-simple-clear ()
+  "Initializes and resets everything to run tests. You should run
+this before running any assertions. Running more than once clears
+out information from the previous run."
+
+  (interactive)
+
+  (make-variable-buffer-local 
+   (defvar context (make-context)
+     "Variable to store testing information for a buffer")
+   )
+  (setf (context-description context) "no description set")
+  (setf (context-start-time context) (cadr (current-time)))
+  (setf (context-assert-count context) 0)
+  (setf (context-failure-count context) 0)
+
+  (with-current-buffer (get-buffer-create "*test-simple*")
+    (let ((old-read-only inhibit-read-only))
+      (setq inhibit-read-only 't)
+      (delete-region (point-min) (point-max))
+      (setq inhibit-read-only old-read-only)))
+  (unless noninteractive
+    (message "Test-Simple: contexts cleared")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Assertion tests
@@ -127,8 +134,7 @@
 
 (defun assert-equal (expected actual &optional opt-fail-message)
   "expectation is that ACTUAL should be equal to EXPECTED."
-  (if (boundp '*test-simple-total-assertions*)
-      (incf *test-simple-total-assertions*))
+  (incf (context-assert-count context))
   (if (not (equal actual expected))
       (let* ((fail-message 
 	      (if opt-fail-message
@@ -151,7 +157,7 @@
 
 (defun assert-nil (actual &optional opt-fail-message)
   "expectation is that ACTUAL is nil."
-  (incf *test-simple-total-assertions*)
+  (incf (context-assert-count context))
   (if actual
       (let* ((fail-message 
 	      (if opt-fail-message
@@ -164,105 +170,58 @@
 	(add-failure "assert-nil" context-mess fail-message))
     t))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Context-management
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defun test-simple-clear-contexts ()
-  (interactive)
-  (setq *test-simple-contexts* '())
-  (setq *test-simple-total-assertions* 0)
-  (make-variable-buffer-local (defvar context (make-context)))
-  (setf (context-description context) "no description set")
-  (setf (context-specs context) '())
-  (with-current-buffer (get-buffer-create "*test-simple*")
-    (let ((old-read-only inhibit-read-only))
-      (setq inhibit-read-only 't)
-      (delete-region (point-min) (point-max))
-      (setq inhibit-read-only old-read-only)))
-  (message "Test-Simple: contexts cleared"))
-
 (defun add-failure(type context-msg fail-msg)
-  (let ((failure-line
+  (incf (context-failure-count context))
+  (let ((failure-msg
 	 (format "Context: %s, type %s %s" context-msg type fail-msg))
 	(old-read-only inhibit-read-only)
 	)
     (save-excursion
       (princ "F")
-      (switch-to-buffer "*test-simple*")
-      (setq inhibit-read-only 't)
-      (insert (concat failure-line "\n"))
-      (overlay-put (make-overlay (point) (- (point) 1)) 
-		   'face '(foreground-color . "red"))
-      (add-to-list 'test-simple-failures failure-line)
-      (setq inhibit-read-only old-read-only)
-      (switch-to-buffer nil))
-    (unless noninteractive
-      (if test-simple-debug-on-error
-	  (signal 'test-simple-assert-failed failure-line)
-	(message failure-line)
-	))))
+      (test-simple-msg failure-msg)
+      (unless noninteractive
+	(if test-simple-debug-on-error
+	    (signal 'test-simple-assert-failed failure-msg)
+	  (message failure-msg)
+	  )))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Execution
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defun test-simple (&optional tags)
-  "Execute all contexts that match given tags"
+(defun end-tests (&optional tags)
+  "Give a tally of the tests run"
   (interactive)
-  (let ((tags-string (or tags (read-string (concat "Execute specs matching these tags (default " *test-simple-default-tags* "): ")
-					   nil nil *test-simple-default-tags*)))
-	(start-time (cadr (current-time)))
-	(failures nil)
-	(spec-count 0))
-    (setq *test-simple-default-tags* tags-string) ; update default for next time
-    (with-output-to-temp-buffer "*test-simple*"
-      (princ (concat "Running specs tagged \"" tags-string "\":\n\n"))
-      (dolist (context (context-find-by-tags (mapcar 'intern (split-string tags-string " "))))
-	(execute-context context))
-      (test-simple-describe-failures test-simple-failures start-time))
-    (if noninteractive 
-	(progn 
-	  (switch-to-buffer "*test-simple*")
-	  (message "%s" (buffer-substring (point-min) (point-max)))))
-    (length test-simple-failures)))
-
-(defun execute-context (context)
-  (condition-case failure
-      (mapcar #'execute-spec (reverse (context-specs context)))
-    (error (princ "E")
-	   (switch-to-buffer "*test-simple*")
-	   (overlay-put (make-overlay (point) (- (point) 1)) 'face '(foreground-color . "red"))
-	   (switch-to-buffer nil)
-	   (add-to-list 'failures (list "Error:" failure) t))
-    (failure (princ "F")
-	     (switch-to-buffer "*test-simple*")
-	     (overlay-put (make-overlay (point) (- (point) 1)) 'face '(foreground-color . "red"))
-	     (switch-to-buffer nil)
-	     (add-to-list 'failures (cdr failure) t))))
-
-(defun execute-spec (spec)
-  (incf spec-count)
-  (funcall spec)
-  (princ "."))
+  (test-simple-describe-failures)
+  (if noninteractive 
+      (progn 
+	(switch-to-buffer "*test-simple*")
+	(message "%s" (buffer-substring (point-min) (point-max)))))
+  (context-failure-count context))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Reporting
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun test-simple-describe-failures (failures start-time)
-  (princ (concat "\n\n" (number-to-string (length failures)) " problem" 
-		 (unless (= 1 (length failures)) "s") " in " 
-		 (number-to-string spec-count)
-		 " specification" (unless (= 1 spec-count) "s") 
-		 " using " (number-to-string *test-simple-total-assertions*) " assertions. "
-		 "(" (number-to-string (- (cadr (current-time)) start-time)) " seconds)\n\n"))
-  (dolist (failure failures)
-    (test-simple-report-result failure)))
+(defun test-simple-msg(msg)
+  (switch-to-buffer "*test-simple*")
+  (let ((old-read-only inhibit-read-only))
+    (setq inhibit-read-only 't)
+    (insert (concat msg "\n"))
+    (setq inhibit-read-only old-read-only)
+  ))
 
-(defun test-simple-report-result (failure)
-  (princ failure)
-  (princ "\n\n"))
+(defun test-simple-summary-line()
+  (let*
+      ((failures (context-failure-count context))
+       (asserts (context-assert-count context))
+       (problems (concat (number-to-string failures) " failure" 
+			 (unless (= 1 failures) "s")))
+       (tests (concat (number-to-string asserts) " assertion" 
+		      (unless (= 1 asserts) "s")))
+       (seconds (- (cadr (current-time)) (context-start-time context)))
+       )
+    (format "\n\n%s in %s (%d seconds)" problems tests seconds)
+  ))
+
+(defun test-simple-describe-failures()
+  (test-simple-msg (test-simple-summary-line)))
 
 (provide 'test-simple)
 ;;; test-simple.el ends here
