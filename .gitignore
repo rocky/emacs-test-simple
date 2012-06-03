@@ -1,4 +1,5 @@
 *~
+*elc
 /Makefile
 /Makefile.in
 /aclocal.m4
@@ -6,5 +7,6 @@
 /config.log
 /config.status
 /configure
+/elc-stamp
 /install-sh
 /missing

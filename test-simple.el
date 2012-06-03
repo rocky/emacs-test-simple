@@ -66,23 +66,18 @@
 
 ;;; Usage:
 
-;; (eval-when-compile 
-;;   (byte-compile-disable-warning 'cl-functions)
-;;   ;; Somehow disabling cl-functions causes the erroneous message:
-;;   ;;   Warning: the function `reduce' might not be defined at runtime.
-;;   ;; FIXME: isolate, fix and/or report back to Emacs developers a bug
-;;   (byte-compile-disable-warning 'unresolved)
-;;   (require 'cl)
-;;   )
+(eval-when-compile 
+  (byte-compile-disable-warning 'cl-functions)
+  ;; Somehow disabling cl-functions causes the erroneous message:
+  ;;   Warning: the function `reduce' might not be defined at runtime.
+  ;; FIXME: isolate, fix and/or report back to Emacs developers a bug
+  ;; (byte-compile-disable-warning 'unresolved)
+  (require 'cl)
+  )
 (require 'cl)
 
 (defvar test-simple-debug-on-error nil
   "If non-nil raise an error on the first failure")
-
-(make-variable-buffer-local
- (defvar *test-simple-total-assertions* 0
-  "Count of number of assertions seen since the last `test-simple-clear-contexts'"
-  ))
 
 (defstruct context 
   description    ;; description of last group of tests
@@ -95,21 +90,23 @@
   "Adds a name to a group of tests."
   (setf (context-description context) description))
 
-(defun test-simple-clear ()
+(defun test-simple-clear (&optional test-info)
   "Initializes and resets everything to run tests. You should run
 this before running any assertions. Running more than once clears
 out information from the previous run."
 
   (interactive)
+  
+  (unless test-info
+    (make-variable-buffer-local 
+     (defvar context (make-context)
+       "Variable to store testing information for a buffer"))
+    (setq test-info context))
 
-  (make-variable-buffer-local 
-   (defvar context (make-context)
-     "Variable to store testing information for a buffer")
-   )
-  (setf (context-description context) "no description set")
-  (setf (context-start-time context) (cadr (current-time)))
-  (setf (context-assert-count context) 0)
-  (setf (context-failure-count context) 0)
+  (setf (context-description test-info) "no description set")
+  (setf (context-start-time test-info) (cadr (current-time)))
+  (setf (context-assert-count test-info) 0)
+  (setf (context-failure-count test-info) 0)
 
   (with-current-buffer (get-buffer-create "*test-simple*")
     (let ((old-read-only inhibit-read-only))
@@ -117,7 +114,7 @@ out information from the previous run."
       (delete-region (point-min) (point-max))
       (setq inhibit-read-only old-read-only)))
   (unless noninteractive
-    (message "Test-Simple: contexts cleared")))
+    (message "Test-Simple: test information cleared")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Assertion tests
@@ -140,16 +137,34 @@ out information from the previous run."
 	      (if opt-fail-message
 		  (format "\n\tMessage: %s" opt-fail-message)
 		""))
+	     (expect-message 
+	      (format "\tExpected: %s\n\tGot:      %s" expected actual))
 	     (context-mess 
 	      (if (boundp 'context)
 		  (context-description context)
 		"unset")))
-	(signal 'test-simple-spec-failed 
-		(format 
-		 "Context: %s%s\n\n\tExpected: %s\n\tGot:      %s"
-		 context-mess
-		 fail-message expected actual))))
-  t)
+	(add-failure "assert-equal" context-mess
+		     (concat expect-message fail-message)))
+    t))
+
+(defun assert-matches (expected-regexp actual &optional opt-fail-message)
+  "expectation is that ACTUAL should match EXPECTED-REGEXP."
+  (incf (context-assert-count context))
+  (if (not (string-match expected-regexp actual))
+      (let* ((fail-message 
+	      (if opt-fail-message
+		  (format "\n\tMessage: %s" opt-fail-message)
+		""))
+	     (expect-message 
+	      (format "\tExpected Regexp: %s\n\tGot:      %s" 
+		      expected-regexp actual))
+	     (context-mess 
+	      (if (boundp 'context)
+		  (context-description context)
+		"unset")))
+	(add-failure "assert-equal" context-mess
+		     (concat expect-message fail-message)))
+    t))
 
 (defun assert-t (actual &optional opt-fail-message)
   "expectation is that ACTUAL is not nil."
@@ -207,21 +222,21 @@ out information from the previous run."
     (setq inhibit-read-only old-read-only)
   ))
 
-(defun test-simple-summary-line()
+(defun test-simple-summary-line(info)
   (let*
-      ((failures (context-failure-count context))
-       (asserts (context-assert-count context))
+      ((failures (context-failure-count info))
+       (asserts (context-assert-count info))
        (problems (concat (number-to-string failures) " failure" 
 			 (unless (= 1 failures) "s")))
        (tests (concat (number-to-string asserts) " assertion" 
 		      (unless (= 1 asserts) "s")))
-       (seconds (- (cadr (current-time)) (context-start-time context)))
+       (seconds (- (cadr (current-time)) (context-start-time info)))
        )
-    (format "\n\n%s in %s (%d seconds)" problems tests seconds)
+    (format "\n\n%s over %s (%d seconds)" problems tests seconds)
   ))
 
 (defun test-simple-describe-failures()
-  (test-simple-msg (test-simple-summary-line)))
+  (test-simple-msg (test-simple-summary-line context)))
 
 (provide 'test-simple)
 ;;; test-simple.el ends here

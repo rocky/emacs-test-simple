@@ -1,5 +1,5 @@
 lisp_files := $(wildcard *.el)
-test_files := $(wildcard test/test-*.el)
+test_files := $(wildcard test/*.el)
 
 EXTRA_DIST = $(lisp_files) $(test_files) README README.textile COPYING
 
@@ -13,7 +13,11 @@ README: README.textile
 	cp README.textile README
 
 # FIGURE out how to DRY the run rules.
-test-simple-basic.run:
+basic.run:
+	(cd $(srcdir)/test && $(EMACS) -batch --no-site-file --no-splash --no-load -l $(@:.run=.el) )
+
+# FIGURE out how to DRY the run rules.
+fns.run:
 	(cd $(srcdir)/test && $(EMACS) -batch --no-site-file --no-splash --no-load -l $(@:.run=.el) )
 
 .PHONY: $(CHECK_FILES)
