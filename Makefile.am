@@ -9,6 +9,10 @@ lisp_LISP = $(lisp_files)
 
 check: $(CHECK_FILES)
 
+check-short:
+	$(MAKE) check 2>&1  | ruby make-check-filter.rb
+
+
 README: README.textile
 	cp README.textile README
 

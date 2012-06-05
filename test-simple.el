@@ -66,6 +66,8 @@
 
 ;;; Usage:
 
+(require 'time-date)
+
 (eval-when-compile 
   (byte-compile-disable-warning 'cl-functions)
   ;; Somehow disabling cl-functions causes the erroneous message:
@@ -79,6 +81,9 @@
 (defvar test-simple-debug-on-error nil
   "If non-nil raise an error on the first failure")
 
+(defvar test-simple-verbosity 0
+  "The greater the number the more verbose output")
+
 (defstruct test-info
   description    ;; description of last group of tests
   assert-count   ;; total number of assertions run 
@@ -91,8 +96,8 @@
 
 (defun note (description &optional test-info)
   "Adds a name to a group of tests."
-  (unless noninteractive
-    (test-simple-msg description))
+  (if (> test-simple-verbosity 0)
+    (test-simple-msg (concat "\n" description) 't))
   (unless test-info 
     (setq test-info test-simple-info))
   (setf (test-info-description test-info) description)
@@ -107,11 +112,11 @@ out information from the previous run."
   
   (unless test-info 
     (unless test-simple-info 
-      (make-variable-buffer-loal (defvar test-simple-info (make-test-info))))
+      (make-variable-buffer-local (defvar test-simple-info (make-test-info))))
     (setq test-info test-simple-info))
 
   (setf (test-info-description test-info) "none set")
-  (setf (test-info-start-time test-info) (cadr (current-time)))
+  (setf (test-info-start-time test-info) (current-time))
   (setf (test-info-assert-count test-info) 0)
   (setf (test-info-failure-count test-info) 0)
 
@@ -127,42 +132,42 @@ out information from the previous run."
 ;; Assertion tests
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmacro assert-raises (error-condition body &optional opt-fail-message test-info)
-  (let ((fail-message (or opt-fail-message
+(defmacro assert-raises (error-condition body &optional fail-message test-info)
+  (let ((fail-message (or fail-message
 			  (format "assert-raises did not get expected %s" 
 				  error-condition))))
     (list 'condition-case nil
 	  (list 'progn body
-		(list 'assert-t nil fail-message test-info))
+		(list 'assert-t nil fail-message test-info "assert-raises"))
 	  (list error-condition '(assert-t t)))))
 
-(defun assert-equal (expected actual &optional opt-fail-message test-info)
+(defun assert-equal (expected actual &optional fail-message test-info)
   "expectation is that ACTUAL should be equal to EXPECTED."
   (unless test-info (setq test-info test-simple-info))
   (incf (test-info-assert-count test-info))
   (if (not (equal actual expected))
       (let* ((fail-message 
-	      (if opt-fail-message
-		  (format "\n\tMessage: %s" opt-fail-message)
+	      (if fail-message
+		  (format "Message: %s" fail-message)
 		""))
 	     (expect-message 
-	      (format "\tExpected: %s\n\tGot:      %s" expected actual))
+	      (format "\n  Expected: %s\n  Got: %s" expected actual))
 	     (test-info-mess 
 	      (if (boundp 'test-info)
 		  (test-info-description test-info)
 		"unset")))
 	(add-failure "assert-equal" test-info-mess
-		     (concat expect-message fail-message)))
-    t))
+		     (concat fail-message expect-message)))
+    (test-simple-msg ".")))
 
-(defun assert-matches (expected-regexp actual &optional opt-fail-message test-info)
+(defun assert-matches (expected-regexp actual &optional fail-message test-info)
   "expectation is that ACTUAL should match EXPECTED-REGEXP."
   (unless test-info (setq test-info test-simple-info))
   (incf (test-info-assert-count test-info))
   (if (not (string-match expected-regexp actual))
       (let* ((fail-message 
-	      (if opt-fail-message
-		  (format "\n\tMessage: %s" opt-fail-message)
+	      (if fail-message
+		  (format "\n\tMessage: %s" fail-message)
 		""))
 	     (expect-message 
 	      (format "\tExpected Regexp: %s\n\tGot:      %s" 
@@ -173,38 +178,40 @@ out information from the previous run."
 		"unset")))
 	(add-failure "assert-equal" test-info-mess
 		     (concat expect-message fail-message)))
-    t))
+    (test-simple-msg ".")))
 
-(defun assert-t (actual &optional opt-fail-message test-info)
+(defun assert-t (actual &optional fail-message test-info)
   "expectation is that ACTUAL is not nil."
-  (assert-nil (not actual) opt-fail-message test-info))
+  (assert-nil (not actual) fail-message test-info "assert-t"))
 
-(defun assert-nil (actual &optional opt-fail-message test-info)
-  "expectation is that ACTUAL is nil."
+(defun assert-nil (actual &optional fail-message test-info assert-type)
+  "expectation is that ACTUAL is nil. FAIL-MESSAGE is an optional
+additional message to be displayed. Since several assertions
+funnel down to this one, ASSERT-TYPE is an optional type."
   (unless test-info (setq test-info test-simple-info))
   (incf (test-info-assert-count test-info))
   (if actual
       (let* ((fail-message 
-	      (if opt-fail-message
-		  (format "\n\tMessage: %s" opt-fail-message)
+	      (if fail-message
+		  (format "\n\tMessage: %s" fail-message)
 		""))
 	     (test-info-mess 
 	      (if (boundp 'test-simple-info)
 		  (test-info-description test-simple-info)
 		"unset")))
 	(add-failure "assert-nil" test-info-mess fail-message test-info))
-    t))
+    (test-simple-msg ".")))
 
 (defun add-failure(type test-info-msg fail-msg &optional test-info)
   (unless test-info (setq test-info test-simple-info))
   (incf (test-info-failure-count test-info))
   (let ((failure-msg
-	 (format "Description: %s, type %s\n%s" test-info-msg type fail-msg))
+	 (format "\nDescription: %s, type %s\n%s" test-info-msg type fail-msg))
 	(old-read-only inhibit-read-only)
 	)
     (save-excursion
-      (princ "F")
-      (test-simple-msg failure-msg)
+      (test-simple-msg "F")
+      (test-simple-msg failure-msg 't)
       (unless noninteractive
 	(if test-simple-debug-on-error
 	    (signal 'test-simple-assert-failed failure-msg)
@@ -226,11 +233,12 @@ out information from the previous run."
 ;; Reporting
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun test-simple-msg(msg)
+(defun test-simple-msg(msg &optional newline)
   (switch-to-buffer "*test-simple*")
   (let ((old-read-only inhibit-read-only))
     (setq inhibit-read-only 't)
-    (insert (concat msg "\n"))
+    (insert msg)
+    (if newline (insert "\n"))
     (setq inhibit-read-only old-read-only)
   ))
 
@@ -242,9 +250,10 @@ out information from the previous run."
 			 (unless (= 1 failures) "s")))
        (tests (concat (number-to-string asserts) " assertion" 
 		      (unless (= 1 asserts) "s")))
-       (seconds (- (cadr (current-time)) (test-info-start-time info)))
+       (elapsed-time (time-since (test-info-start-time info)))
        )
-    (format "\n\n%s over %s (%d seconds)" problems tests seconds)
+    (format "\n%s in %s (%g seconds)" problems tests 
+	    (float-time elapsed-time))
   ))
 
 (defun test-simple-describe-failures(&optional test-info)
