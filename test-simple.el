@@ -79,16 +79,24 @@
 (defvar test-simple-debug-on-error nil
   "If non-nil raise an error on the first failure")
 
-(defstruct context 
+(defstruct test-info
   description    ;; description of last group of tests
   assert-count   ;; total number of assertions run 
   failure-count  ;; total number of failures seen
   start-time     ;; Time run started
   )
 
-(defun note (description)
+(defvar test-simple-info (make-test-info)
+  "Variable to store testing information for a buffer")
+
+(defun note (description &optional test-info)
   "Adds a name to a group of tests."
-  (setf (context-description context) description))
+  (unless noninteractive
+    (test-simple-msg description))
+  (unless test-info 
+    (setq test-info test-simple-info))
+  (setf (test-info-description test-info) description)
+)
 
 (defun test-simple-clear (&optional test-info)
   "Initializes and resets everything to run tests. You should run
@@ -97,16 +105,15 @@ out information from the previous run."
 
   (interactive)
   
-  (unless test-info
-    (make-variable-buffer-local 
-     (defvar context (make-context)
-       "Variable to store testing information for a buffer"))
-    (setq test-info context))
+  (unless test-info 
+    (unless test-simple-info 
+      (make-variable-buffer-loal (defvar test-simple-info (make-test-info))))
+    (setq test-info test-simple-info))
 
-  (setf (context-description test-info) "no description set")
-  (setf (context-start-time test-info) (cadr (current-time)))
-  (setf (context-assert-count test-info) 0)
-  (setf (context-failure-count test-info) 0)
+  (setf (test-info-description test-info) "none set")
+  (setf (test-info-start-time test-info) (cadr (current-time)))
+  (setf (test-info-assert-count test-info) 0)
+  (setf (test-info-failure-count test-info) 0)
 
   (with-current-buffer (get-buffer-create "*test-simple*")
     (let ((old-read-only inhibit-read-only))
@@ -120,18 +127,19 @@ out information from the previous run."
 ;; Assertion tests
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmacro assert-raises (error-condition body &optional opt-fail-message)
+(defmacro assert-raises (error-condition body &optional opt-fail-message test-info)
   (let ((fail-message (or opt-fail-message
 			  (format "assert-raises did not get expected %s" 
 				  error-condition))))
     (list 'condition-case nil
 	  (list 'progn body
-		(list 'assert-t nil fail-message))
+		(list 'assert-t nil fail-message test-info))
 	  (list error-condition '(assert-t t)))))
 
-(defun assert-equal (expected actual &optional opt-fail-message)
+(defun assert-equal (expected actual &optional opt-fail-message test-info)
   "expectation is that ACTUAL should be equal to EXPECTED."
-  (incf (context-assert-count context))
+  (unless test-info (setq test-info test-simple-info))
+  (incf (test-info-assert-count test-info))
   (if (not (equal actual expected))
       (let* ((fail-message 
 	      (if opt-fail-message
@@ -139,17 +147,18 @@ out information from the previous run."
 		""))
 	     (expect-message 
 	      (format "\tExpected: %s\n\tGot:      %s" expected actual))
-	     (context-mess 
-	      (if (boundp 'context)
-		  (context-description context)
+	     (test-info-mess 
+	      (if (boundp 'test-info)
+		  (test-info-description test-info)
 		"unset")))
-	(add-failure "assert-equal" context-mess
+	(add-failure "assert-equal" test-info-mess
 		     (concat expect-message fail-message)))
     t))
 
-(defun assert-matches (expected-regexp actual &optional opt-fail-message)
+(defun assert-matches (expected-regexp actual &optional opt-fail-message test-info)
   "expectation is that ACTUAL should match EXPECTED-REGEXP."
-  (incf (context-assert-count context))
+  (unless test-info (setq test-info test-simple-info))
+  (incf (test-info-assert-count test-info))
   (if (not (string-match expected-regexp actual))
       (let* ((fail-message 
 	      (if opt-fail-message
@@ -158,37 +167,39 @@ out information from the previous run."
 	     (expect-message 
 	      (format "\tExpected Regexp: %s\n\tGot:      %s" 
 		      expected-regexp actual))
-	     (context-mess 
-	      (if (boundp 'context)
-		  (context-description context)
+	     (test-info-mess 
+	      (if (boundp 'test-info)
+		  (test-info-description test-info)
 		"unset")))
-	(add-failure "assert-equal" context-mess
+	(add-failure "assert-equal" test-info-mess
 		     (concat expect-message fail-message)))
     t))
 
-(defun assert-t (actual &optional opt-fail-message)
+(defun assert-t (actual &optional opt-fail-message test-info)
   "expectation is that ACTUAL is not nil."
-  (assert-nil (not actual) opt-fail-message))
+  (assert-nil (not actual) opt-fail-message test-info))
 
-(defun assert-nil (actual &optional opt-fail-message)
+(defun assert-nil (actual &optional opt-fail-message test-info)
   "expectation is that ACTUAL is nil."
-  (incf (context-assert-count context))
+  (unless test-info (setq test-info test-simple-info))
+  (incf (test-info-assert-count test-info))
   (if actual
       (let* ((fail-message 
 	      (if opt-fail-message
 		  (format "\n\tMessage: %s" opt-fail-message)
 		""))
-	     (context-mess 
-	      (if (boundp 'context)
-		  (context-description context)
+	     (test-info-mess 
+	      (if (boundp 'test-simple-info)
+		  (test-info-description test-simple-info)
 		"unset")))
-	(add-failure "assert-nil" context-mess fail-message))
+	(add-failure "assert-nil" test-info-mess fail-message test-info))
     t))
 
-(defun add-failure(type context-msg fail-msg)
-  (incf (context-failure-count context))
+(defun add-failure(type test-info-msg fail-msg &optional test-info)
+  (unless test-info (setq test-info test-simple-info))
+  (incf (test-info-failure-count test-info))
   (let ((failure-msg
-	 (format "Context: %s, type %s %s" context-msg type fail-msg))
+	 (format "Description: %s, type %s\n%s" test-info-msg type fail-msg))
 	(old-read-only inhibit-read-only)
 	)
     (save-excursion
@@ -200,15 +211,16 @@ out information from the previous run."
 	  (message failure-msg)
 	  )))))
 
-(defun end-tests (&optional tags)
+(defun end-tests (&optional test-info)
   "Give a tally of the tests run"
   (interactive)
-  (test-simple-describe-failures)
+  (unless test-info (setq test-info test-simple-info))
+  (test-simple-describe-failures test-info)
   (if noninteractive 
       (progn 
 	(switch-to-buffer "*test-simple*")
 	(message "%s" (buffer-substring (point-min) (point-max)))))
-  (context-failure-count context))
+  (test-info-failure-count test-info))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Reporting
@@ -224,19 +236,21 @@ out information from the previous run."
 
 (defun test-simple-summary-line(info)
   (let*
-      ((failures (context-failure-count info))
-       (asserts (context-assert-count info))
+      ((failures (test-info-failure-count info))
+       (asserts (test-info-assert-count info))
        (problems (concat (number-to-string failures) " failure" 
 			 (unless (= 1 failures) "s")))
        (tests (concat (number-to-string asserts) " assertion" 
 		      (unless (= 1 asserts) "s")))
-       (seconds (- (cadr (current-time)) (context-start-time info)))
+       (seconds (- (cadr (current-time)) (test-info-start-time info)))
        )
     (format "\n\n%s over %s (%d seconds)" problems tests seconds)
   ))
 
-(defun test-simple-describe-failures()
-  (test-simple-msg (test-simple-summary-line context)))
+(defun test-simple-describe-failures(&optional test-info)
+  (unless test-info (setq test-info test-simple-info))
+  (goto-char (point-max))
+  (test-simple-msg (test-simple-summary-line test-info)))
 
 (provide 'test-simple)
 ;;; test-simple.el ends here
