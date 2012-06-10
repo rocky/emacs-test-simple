@@ -141,11 +141,11 @@ out information from the previous run."
 		(list 'assert-t nil fail-message test-info "assert-raises"))
 	  (list error-condition '(assert-t t)))))
 
-(defun assert-equal (expected actual &optional fail-message test-info)
+(defun assert-op (op expected actual &optional fail-message test-info)
   "expectation is that ACTUAL should be equal to EXPECTED."
   (unless test-info (setq test-info test-simple-info))
   (incf (test-info-assert-count test-info))
-  (if (not (equal actual expected))
+  (if (not (funcall op actual expected))
       (let* ((fail-message 
 	      (if fail-message
 		  (format "Message: %s" fail-message)
@@ -156,9 +156,21 @@ out information from the previous run."
 	      (if (boundp 'test-info)
 		  (test-info-description test-info)
 		"unset")))
-	(add-failure "assert-equal" test-info-mess
+	(add-failure (format "assert-%s" op) test-info-mess
 		     (concat fail-message expect-message)))
-    (test-simple-msg ".")))
+    (progn (test-simple-msg ".") t)))
+
+(defun assert-equal (expected actual &optional fail-message test-info)
+  "expectation is that ACTUAL should be equal to EXPECTED."
+  (assert-op 'equal expected actual fail-message test-info))
+
+(defun assert-eq (expected actual &optional fail-message test-info)
+  "expectation is that ACTUAL should be EQ to EXPECTED."
+  (assert-op 'eql expected actual fail-message test-info))
+
+(defun assert-eql (expected actual &optional fail-message test-info)
+  "expectation is that ACTUAL should be EQL to EXPECTED."
+  (assert-op 'eql expected actual fail-message test-info))
 
 (defun assert-matches (expected-regexp actual &optional fail-message test-info)
   "expectation is that ACTUAL should match EXPECTED-REGEXP."
@@ -178,7 +190,7 @@ out information from the previous run."
 		"unset")))
 	(add-failure "assert-equal" test-info-mess
 		     (concat expect-message fail-message)))
-    (test-simple-msg ".")))
+    (progn (test-simple-msg ".") t)))
 
 (defun assert-t (actual &optional fail-message test-info)
   "expectation is that ACTUAL is not nil."
@@ -200,7 +212,7 @@ funnel down to this one, ASSERT-TYPE is an optional type."
 		  (test-info-description test-simple-info)
 		"unset")))
 	(add-failure "assert-nil" test-info-mess fail-message test-info))
-    (test-simple-msg ".")))
+    (progn (test-simple-msg ".") t)))
 
 (defun add-failure(type test-info-msg fail-msg &optional test-info)
   (unless test-info (setq test-info test-simple-info))
@@ -215,7 +227,7 @@ funnel down to this one, ASSERT-TYPE is an optional type."
       (unless noninteractive
 	(if test-simple-debug-on-error
 	    (signal 'test-simple-assert-failed failure-msg)
-	  (message failure-msg)
+	  ;;(message failure-msg)
 	  )))))
 
 (defun end-tests (&optional test-info)
@@ -226,7 +238,10 @@ funnel down to this one, ASSERT-TYPE is an optional type."
   (if noninteractive 
       (progn 
 	(switch-to-buffer "*test-simple*")
-	(message "%s" (buffer-substring (point-min) (point-max)))))
+	(message "%s" (buffer-substring (point-min) (point-max)))
+	)
+    (switch-to-buffer-other-window "*test-simple*")
+    )
   (test-info-failure-count test-info))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -240,6 +255,7 @@ funnel down to this one, ASSERT-TYPE is an optional type."
     (insert msg)
     (if newline (insert "\n"))
     (setq inhibit-read-only old-read-only)
+    (switch-to-buffer nil)
   ))
 
 (defun test-simple-summary-line(info)

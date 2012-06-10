@@ -11,5 +11,3 @@
 (assert-raises error (error "you should not see this") "assert-raises")
 
 (end-tests)
-
-
