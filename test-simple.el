@@ -103,7 +103,14 @@
   (setf (test-info-description test-info) description)
 )
 
-(defun test-simple-clear (&optional test-info)
+(defmacro test-simple-start ()
+  `(test-simple-clear nil 
+		      (if (and (functionp '__FILE__) (__FILE__))
+			  (file-name-nondirectory (__FILE__))
+			(buffer-name)))
+)
+
+(defun test-simple-clear (&optional test-info test-start-msg)
   "Initializes and resets everything to run tests. You should run
 this before running any assertions. Running more than once clears
 out information from the previous run."
@@ -124,6 +131,7 @@ out information from the previous run."
     (let ((old-read-only inhibit-read-only))
       (setq inhibit-read-only 't)
       (delete-region (point-min) (point-max))
+      (if test-start-msg (insert (format "%s\n" test-start-msg)))
       (setq inhibit-read-only old-read-only)))
   (unless noninteractive
     (message "Test-Simple: test information cleared")))
@@ -241,8 +249,7 @@ funnel down to this one, ASSERT-TYPE is an optional type."
 	(message "%s" (buffer-substring (point-min) (point-max)))
 	)
     (switch-to-buffer-other-window "*test-simple*")
-    )
-  (test-info-failure-count test-info))
+    ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Reporting
