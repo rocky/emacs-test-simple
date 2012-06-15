@@ -1,3 +1,3 @@
-_test-simple.el_ allows you to create unit tests for your Emacs Lisp code. Executable specifications allow you to check that your code is working correctly in an automated fashion that you can use to drive the focus of your development. (It's related to Test-Driven Development.) You can read up on it at the "Behavior-Driven Development Wiki":http://behaviour-driven.org.
+_test-simple.el_ allows you to create unit tests for your Emacs Lisp code in a very simple way. The system is designed to be useful both when run interactively or by a batch emacs invocation.
 
 __To be continued....__
