@@ -85,10 +85,10 @@
   "The greater the number the more verbose output")
 
 (defstruct test-info
-  description    ;; description of last group of tests
-  assert-count   ;; total number of assertions run 
-  failure-count  ;; total number of failures seen
-  start-time     ;; Time run started
+  description                 ;; description of last group of tests
+  (assert-count 0)            ;; total number of assertions run 
+  (failure-count 0)           ;; total number of failures seen
+  (start-time (current-time)) ;; Time run started
   )
 
 (defvar test-simple-info (make-test-info)

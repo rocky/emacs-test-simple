@@ -7,22 +7,15 @@ CHECK_FILES = $(notdir $(test_files:.el=.run))
 
 lisp_LISP = $(lisp_files)
 
-check: $(CHECK_FILES)
+check: $(test-files)
+	$(MAKE) -C test check
 
 check-short:
-	$(MAKE) check 2>&1  | ruby make-check-filter.rb
+	$(MAKE) -C test check 2>&1  | ruby make-check-filter.rb
 
 
 README: README.textile
 	cp README.textile README
-
-# FIGURE out how to DRY the run rules.
-basic.run:
-	(cd $(srcdir)/test && $(EMACS) -batch --no-site-file --no-splash --no-load -l $(@:.run=.el) )
-
-# FIGURE out how to DRY the run rules.
-fns.run:
-	(cd $(srcdir)/test && $(EMACS) -batch --no-site-file --no-splash --no-load -l $(@:.run=.el) )
 
 .PHONY: $(CHECK_FILES)
 
