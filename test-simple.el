@@ -1,6 +1,5 @@
 ;;; test-simple.el --- Simple Unit Test Framework for Emacs Lisp 
-;; Totally rewritten from Phil Hagelberg's behave.el by rocky
-;; See also Christian Ohler's ert http://github.com/ohler/ert
+;; Rewritten from Phil Hagelberg's behave.el by rocky
 
 ;; Copyright (C) 2010, 2012 Rocky Bernstein
 
@@ -96,12 +95,14 @@
 
 (defun note (description &optional test-info)
   "Adds a name to a group of tests."
-  (if (> test-simple-verbosity 0)
-    (test-simple-msg (concat "\n" description) 't))
-  (unless test-info 
-    (setq test-info test-simple-info))
-  (setf (test-info-description test-info) description)
-)
+  (if (getenv "USE_TAP") 
+    (test-simple-msg (format "# %s" description) 't)
+    (if (> test-simple-verbosity 0)
+	(test-simple-msg (concat "\n" description) 't))
+    (unless test-info 
+      (setq test-info test-simple-info))
+    (setf (test-info-description test-info) description)
+    ))
 
 (defmacro test-simple-start ()
   `(test-simple-clear nil 
@@ -166,7 +167,7 @@ out information from the previous run."
 		"unset")))
 	(add-failure (format "assert-%s" op) test-info-mess
 		     (concat fail-message expect-message)))
-    (progn (test-simple-msg ".") t)))
+    (ok-msg fail-message)))
 
 (defun assert-equal (expected actual &optional fail-message test-info)
   "expectation is that ACTUAL should be equal to EXPECTED."
@@ -220,7 +221,7 @@ funnel down to this one, ASSERT-TYPE is an optional type."
 		  (test-info-description test-simple-info)
 		"unset")))
 	(add-failure "assert-nil" test-info-mess fail-message test-info))
-    (progn (test-simple-msg ".") t)))
+    (ok-msg fail-message)))
 
 (defun add-failure(type test-info-msg fail-msg &optional test-info)
   (unless test-info (setq test-info test-simple-info))
@@ -230,7 +231,7 @@ funnel down to this one, ASSERT-TYPE is an optional type."
 	(old-read-only inhibit-read-only)
 	)
     (save-excursion
-      (test-simple-msg "F")
+      (not-ok-msg fail-msg)
       (test-simple-msg failure-msg 't)
       (unless noninteractive
 	(if test-simple-debug-on-error
@@ -265,6 +266,26 @@ funnel down to this one, ASSERT-TYPE is an optional type."
     (switch-to-buffer nil)
   ))
 
+(defun ok-msg(fail-message &optional test-info)
+  (unless test-info (setq test-info test-simple-info))
+  (let ((msg (if (getenv "USE_TAP") 
+		 (if (equal fail-message "")
+		     (format "ok %d\n" (test-info-assert-count test-info))
+		   (format "ok %d - %s\n" 
+			   (test-info-assert-count test-info)
+			   fail-message))
+	       ".")))
+      (test-simple-msg msg))
+  't)
+
+(defun not-ok-msg(fail-message &optional test-info)
+  (unless test-info (setq test-info test-simple-info))
+  (let ((msg (if (getenv "USE_TAP") 
+		 (format "not ok %d\n" (test-info-assert-count test-info))
+	       "F")))
+      (test-simple-msg msg))
+  nil)
+
 (defun test-simple-summary-line(info)
   (let*
       ((failures (test-info-failure-count info))
@@ -275,9 +296,11 @@ funnel down to this one, ASSERT-TYPE is an optional type."
 		      (unless (= 1 asserts) "s")))
        (elapsed-time (time-since (test-info-start-time info)))
        )
-    (format "\n%s in %s (%g seconds)" problems tests 
-	    (float-time elapsed-time))
-  ))
+    (if (getenv "USE_TAP") 
+	(format "1..%d" asserts)
+      (format "\n%s in %s (%g seconds)" problems tests 
+	      (float-time elapsed-time))
+  )))
 
 (defun test-simple-describe-failures(&optional test-info)
   (unless test-info (setq test-info test-simple-info))
