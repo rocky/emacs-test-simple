@@ -1,3 +1,10 @@
-_test-simple.el_ allows you to create unit tests for your Emacs Lisp code in a very simple way. The system is designed to be useful both when run interactively or by a batch emacs invocation.
+_test-simple.el_ is intended to be:
+
+* Simple -- no need for _contexts_, _specifications_, or __test tags__. But if you want, you still can add custom assert failure messages or add notes before a group of tests.
+* Facilitate interactive use with `eval-last-sexp`, `eval-region`, and `eval-buffer`
+* Allow running non-interactively batch use over a number of test files
+
+I use this my Debugger front-end https://github.com/rocky/emacs-dbgr
+
 
 __To be continued....__
