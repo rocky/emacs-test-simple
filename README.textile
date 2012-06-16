@@ -1,7 +1,7 @@
 _test-simple.el_ is intended to be:
 
 * Simple -- no need for _contexts_, _specifications_, or __test tags__. But if you want, you still can add custom assert failure messages or add notes before a group of tests.
-* Facilitate interactive use with `eval-last-sexp`, `eval-region`, and `eval-buffer`
+* Facilitate interactive use with @eval-last-sexp@, @eval-region@, and @eval-buffer@
 * Allow running non-interactively batch use over a number of test files
 
 I use this my Debugger front-end https://github.com/rocky/emacs-dbgr
