@@ -104,12 +104,13 @@
     (setf (test-info-description test-info) description)
     ))
 
-(defmacro test-simple-start ()
+(defmacro test-simple-start (&optional test-start-msg)
   `(test-simple-clear nil 
-		      (if (and (functionp '__FILE__) (__FILE__))
-			  (file-name-nondirectory (__FILE__))
-			(buffer-name)))
-)
+		      (or ,test-start-msg
+			  (if (and (functionp '__FILE__) (__FILE__))
+			      (file-name-nondirectory (__FILE__))
+			    (buffer-name)))
+		      ))
 
 (defun test-simple-clear (&optional test-info test-start-msg)
   "Initializes and resets everything to run tests. You should run

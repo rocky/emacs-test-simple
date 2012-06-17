@@ -1,6 +1,6 @@
 (require 'cl)
 (load-file "../test-simple.el")
-(test-simple-clear)
+(test-simple-start "test-simple.el")
 
 (note "basic-tests")
 (assert-t (memq 'test-simple features) "'test-simple provided")
