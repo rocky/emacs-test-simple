@@ -8,7 +8,7 @@ I use this my "Debugger front end.":https://github.com/rocky/emacs-dbgr
 
 Here is an example found in the "examples directory.":https://github.com/rocky/emacs-test-simple/tree/master/test
 
-In file `gcd.el`:
+In file <code>gcd.el</code:
 
 <pre><code>
 (defun gcd(a b)
@@ -26,7 +26,7 @@ In file `gcd.el`:
 )
 </code></pre>
      
-In file `test-gcd.el` in the same directory:
+In file <code>test-gcd.el</code> in the same directory:
 
 <pre><code>
 (require 'test-simple)
