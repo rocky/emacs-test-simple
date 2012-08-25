@@ -30,9 +30,10 @@ In file <code>test-gcd.el</code> in the same directory:
 
 <pre><code>
 (require 'test-simple)
+(test-simple-start) ;; Zero counters and start the stop watch.
 
-(test-simple-start)
-
+;; Use (load-file) below because we want to always to read the source.
+;; Also, we don't want no stinking compiled source.
 (assert-t (load-file "./gcd.el") 
 	  "Can't load gcd.el - are you in the right directory?" )
 
@@ -47,7 +48,7 @@ In file <code>test-gcd.el</code> in the same directory:
 (assert-equal 1 (gcd 3 5) "gcd(3,5)")
 (assert-equal 8 (gcd 8 32) "gcd(8,32)")
 
-(end-tests)
+(end-tests) ;; Stop the clock and print a summary
 </code></pre>
 
 Edit (with Emacs of course) <code>test-gcd.el</code> and run <code>M-x eval-current-buffer</code>
