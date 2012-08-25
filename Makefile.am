@@ -1,11 +1,11 @@
 lisp_files := $(wildcard *.el)
+lisp_LISP = $(lisp_files)
 test_files := $(wildcard test/*.el)
 
 EXTRA_DIST = $(lisp_files) $(test_files) README README.textile COPYING
 
 CHECK_FILES = $(notdir $(test_files:.el=.run))
 
-lisp_LISP = $(lisp_files)
 
 check: $(test-files)
 	$(MAKE) -C test check
