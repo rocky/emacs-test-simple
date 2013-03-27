@@ -1,11 +1,12 @@
-;;; test-simple.el --- Simple Unit Test Framework for Emacs Lisp 
+;;; test-simple.el --- Simple Unit Test Framework for Emacs Lisp
 ;; Rewritten from Phil Hagelberg's behave.el by rocky
 
 ;; Copyright (C) 2010, 2012 Rocky Bernstein
 
 ;; Author: Rocky Bernstein
 ;; URL: http://github.com/rocky/emacs-test-simple
-;; Keywords: unit-test 
+;; Keywords: unit-test
+;; Version: 0.2.0
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -31,31 +32,31 @@
 ;;; Commentary:
 
 ;; test-simple.el allows you to write tests for your Emacs Lisp
-;; code. Executable specifications allow you to check that your code
+;; code.  Executable specifications allow you to check that your code
 ;; is working correctly in an automated fashion that you can use to
-;; drive the focus of your development. (It's related to Test-Driven
+;; drive the focus of your development.  (It's related to Test-Driven
 ;; Development.) You can read up on it at http://behaviour-driven.org.
 
 ;; Assertions may have docstrings so that when the specifications
-;; aren't met it is easy to see what caused the failure.  
+;; aren't met it is easy to see what caused the failure.
 
 ;; When "note" is used subsequent tests are grouped assumed to be
 ;; related to that not.
 
-;; When you want to run the specs, evaluate the buffer. Or evaluate
-;; individual assertions. Results are save in the
-;; *test-simple* buffer. 
+;; When you want to run the specs, evaluate the buffer.  Or evaluate
+;; individual assertions.  Results are save in the
+;; *test-simple* buffer.
 
 ;;; Implementation
 
-;; Contexts are stored in the *test-simple-contexts* list as structs. Each
+;; Contexts are stored in the *test-simple-contexts* list as structs.  Each
 ;; context has a "specs" slot that contains a list of its specs, which
-;; are stored as closures. The expect form ensures that expectations
+;; are stored as closures.  The expect form ensures that expectations
 ;; are met and signals test-simple-spec-failed if they are not.
 
 ;; Warning: the variable CONTEXT is used within macros
 ;; in such a way that they could shadow variables of the same name in
-;; the code being tested. Future versions will use gensyms to solve
+;; the code being tested.  Future versions will use gensyms to solve
 ;; this issue, but in the mean time avoid relying upon variables with
 ;; those names.
 
@@ -67,7 +68,9 @@
 
 (require 'time-date)
 
-(eval-when-compile 
+;;; Code:
+
+(eval-when-compile
   (byte-compile-disable-warning 'cl-functions)
   ;; Somehow disabling cl-functions causes the erroneous message:
   ;;   Warning: the function `reduce' might not be defined at runtime.
@@ -78,34 +81,34 @@
 (require 'cl)
 
 (defvar test-simple-debug-on-error nil
-  "If non-nil raise an error on the first failure")
+  "If non-nil raise an error on the first failure.")
 
 (defvar test-simple-verbosity 0
-  "The greater the number the more verbose output")
+  "The greater the number the more verbose output.")
 
 (defstruct test-info
   description                 ;; description of last group of tests
-  (assert-count 0)            ;; total number of assertions run 
+  (assert-count 0)            ;; total number of assertions run
   (failure-count 0)           ;; total number of failures seen
   (start-time (current-time)) ;; Time run started
   )
 
 (defvar test-simple-info (make-test-info)
-  "Variable to store testing information for a buffer")
+  "Variable to store testing information for a buffer.")
 
 (defun note (description &optional test-info)
   "Adds a name to a group of tests."
-  (if (getenv "USE_TAP") 
+  (if (getenv "USE_TAP")
     (test-simple-msg (format "# %s" description) 't)
     (if (> test-simple-verbosity 0)
 	(test-simple-msg (concat "\n" description) 't))
-    (unless test-info 
+    (unless test-info
       (setq test-info test-simple-info))
     (setf (test-info-description test-info) description)
     ))
 
 (defmacro test-simple-start (&optional test-start-msg)
-  `(test-simple-clear nil 
+  `(test-simple-clear nil
 		      (or ,test-start-msg
 			  (if (and (functionp '__FILE__) (__FILE__))
 			      (file-name-nondirectory (__FILE__))
@@ -118,9 +121,9 @@ this before running any assertions. Running more than once clears
 out information from the previous run."
 
   (interactive)
-  
-  (unless test-info 
-    (unless test-simple-info 
+
+  (unless test-info
+    (unless test-simple-info
       (make-variable-buffer-local (defvar test-simple-info (make-test-info))))
     (setq test-info test-simple-info))
 
@@ -144,7 +147,7 @@ out information from the previous run."
 
 (defmacro assert-raises (error-condition body &optional fail-message test-info)
   (let ((fail-message (or fail-message
-			  (format "assert-raises did not get expected %s" 
+			  (format "assert-raises did not get expected %s"
 				  error-condition))))
     (list 'condition-case nil
 	  (list 'progn body
@@ -156,13 +159,13 @@ out information from the previous run."
   (unless test-info (setq test-info test-simple-info))
   (incf (test-info-assert-count test-info))
   (if (not (funcall op actual expected))
-      (let* ((fail-message 
+      (let* ((fail-message
 	      (if fail-message
 		  (format "Message: %s" fail-message)
 		""))
-	     (expect-message 
+	     (expect-message
 	      (format "\n  Expected: %s\n  Got: %s" expected actual))
-	     (test-info-mess 
+	     (test-info-mess
 	      (if (boundp 'test-info)
 		  (test-info-description test-info)
 		"unset")))
@@ -187,14 +190,14 @@ out information from the previous run."
   (unless test-info (setq test-info test-simple-info))
   (incf (test-info-assert-count test-info))
   (if (not (string-match expected-regexp actual))
-      (let* ((fail-message 
+      (let* ((fail-message
 	      (if fail-message
 		  (format "\n\tMessage: %s" fail-message)
 		""))
-	     (expect-message 
-	      (format "\tExpected Regexp: %s\n\tGot:      %s" 
+	     (expect-message
+	      (format "\tExpected Regexp: %s\n\tGot:      %s"
 		      expected-regexp actual))
-	     (test-info-mess 
+	     (test-info-mess
 	      (if (boundp 'test-info)
 		  (test-info-description test-info)
 		"unset")))
@@ -213,11 +216,11 @@ funnel down to this one, ASSERT-TYPE is an optional type."
   (unless test-info (setq test-info test-simple-info))
   (incf (test-info-assert-count test-info))
   (if actual
-      (let* ((fail-message 
+      (let* ((fail-message
 	      (if fail-message
 		  (format "\n\tMessage: %s" fail-message)
 		""))
-	     (test-info-mess 
+	     (test-info-mess
 	      (if (boundp 'test-simple-info)
 		  (test-info-description test-simple-info)
 		"unset")))
@@ -245,8 +248,8 @@ funnel down to this one, ASSERT-TYPE is an optional type."
   (interactive)
   (unless test-info (setq test-info test-simple-info))
   (test-simple-describe-failures test-info)
-  (if noninteractive 
-      (progn 
+  (if noninteractive
+      (progn
 	(switch-to-buffer "*test-simple*")
 	(message "%s" (buffer-substring (point-min) (point-max)))
 	)
@@ -269,10 +272,10 @@ funnel down to this one, ASSERT-TYPE is an optional type."
 
 (defun ok-msg(fail-message &optional test-info)
   (unless test-info (setq test-info test-simple-info))
-  (let ((msg (if (getenv "USE_TAP") 
+  (let ((msg (if (getenv "USE_TAP")
 		 (if (equal fail-message "")
 		     (format "ok %d\n" (test-info-assert-count test-info))
-		   (format "ok %d - %s\n" 
+		   (format "ok %d - %s\n"
 			   (test-info-assert-count test-info)
 			   fail-message))
 	       ".")))
@@ -281,7 +284,7 @@ funnel down to this one, ASSERT-TYPE is an optional type."
 
 (defun not-ok-msg(fail-message &optional test-info)
   (unless test-info (setq test-info test-simple-info))
-  (let ((msg (if (getenv "USE_TAP") 
+  (let ((msg (if (getenv "USE_TAP")
 		 (format "not ok %d\n" (test-info-assert-count test-info))
 	       "F")))
       (test-simple-msg msg))
@@ -291,15 +294,15 @@ funnel down to this one, ASSERT-TYPE is an optional type."
   (let*
       ((failures (test-info-failure-count info))
        (asserts (test-info-assert-count info))
-       (problems (concat (number-to-string failures) " failure" 
+       (problems (concat (number-to-string failures) " failure"
 			 (unless (= 1 failures) "s")))
-       (tests (concat (number-to-string asserts) " assertion" 
+       (tests (concat (number-to-string asserts) " assertion"
 		      (unless (= 1 asserts) "s")))
        (elapsed-time (time-since (test-info-start-time info)))
        )
-    (if (getenv "USE_TAP") 
+    (if (getenv "USE_TAP")
 	(format "1..%d" asserts)
-      (format "\n%s in %s (%g seconds)" problems tests 
+      (format "\n%s in %s (%g seconds)" problems tests
 	      (float-time elapsed-time))
   )))
 
