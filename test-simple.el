@@ -32,9 +32,9 @@
 ;;; Commentary:
 
 ;; test-simple.el allows you to write tests for your Emacs Lisp
-;; code. Executable specifications allow you to check that your code
+;; code.  Executable specifications allow you to check that your code
 ;; is working correctly in an automated fashion that you can use to
-;; drive the focus of your development. (It's related to Test-Driven
+;; drive the focus of your development.  (It's related to Test-Driven
 ;; Development.) You can read up on it at http://behaviour-driven.org.
 
 ;; Assertions may have docstrings so that when the specifications
@@ -43,20 +43,20 @@
 ;; When "note" is used subsequent tests are grouped assumed to be
 ;; related to that not.
 
-;; When you want to run the specs, evaluate the buffer. Or evaluate
-;; individual assertions. Results are save in the
+;; When you want to run the specs, evaluate the buffer.  Or evaluate
+;; individual assertions.  Results are save in the
 ;; *test-simple* buffer.
 
 ;;; Implementation
 
-;; Contexts are stored in the *test-simple-contexts* list as structs. Each
+;; Contexts are stored in the *test-simple-contexts* list as structs.  Each
 ;; context has a "specs" slot that contains a list of its specs, which
-;; are stored as closures. The expect form ensures that expectations
+;; are stored as closures.  The expect form ensures that expectations
 ;; are met and signals test-simple-spec-failed if they are not.
 
 ;; Warning: the variable CONTEXT is used within macros
 ;; in such a way that they could shadow variables of the same name in
-;; the code being tested. Future versions will use gensyms to solve
+;; the code being tested.  Future versions will use gensyms to solve
 ;; this issue, but in the mean time avoid relying upon variables with
 ;; those names.
 
@@ -67,6 +67,8 @@
 ;;; Usage:
 
 (require 'time-date)
+
+;;; Code:
 
 (eval-when-compile
   (byte-compile-disable-warning 'cl-functions)
@@ -79,10 +81,10 @@
 (require 'cl)
 
 (defvar test-simple-debug-on-error nil
-  "If non-nil raise an error on the first failure")
+  "If non-nil raise an error on the first failure.")
 
 (defvar test-simple-verbosity 0
-  "The greater the number the more verbose output")
+  "The greater the number the more verbose output.")
 
 (defstruct test-info
   description                 ;; description of last group of tests
@@ -92,7 +94,7 @@
   )
 
 (defvar test-simple-info (make-test-info)
-  "Variable to store testing information for a buffer")
+  "Variable to store testing information for a buffer.")
 
 (defun note (description &optional test-info)
   "Adds a name to a group of tests."
