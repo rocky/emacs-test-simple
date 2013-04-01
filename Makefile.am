@@ -2,7 +2,7 @@ lisp_files := $(wildcard *.el)
 lisp_LISP = $(lisp_files)
 test_files := $(wildcard test/*.el)
 
-EXTRA_DIST = $(lisp_files) $(test_files) README README.textile COPYING
+EXTRA_DIST = $(lisp_files) $(test_files) README THANKS README.textile COPYING
 
 CHECK_FILES = $(notdir $(test_files:.el=.run))
 
