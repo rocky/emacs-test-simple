@@ -1,8 +1,7 @@
 #!/bin/sh
-# Copyright (C) 1995, 2000, 2003, 2004, 2005, 2009, 2010 Free Software
-# Foundation, Inc.
+# Copyright (C) 1995-2012 Free Software Foundation, Inc.
 
-scriptversion=2010-02-06.18; # UTC
+scriptversion=2013-03-27.22
 
 # Franc,ois Pinard <pinard@iro.umontreal.ca>, 1995.
 #
@@ -30,16 +29,16 @@ scriptversion=2010-02-06.18; # UTC
 
 case $1 in
   '')
-     echo "$0: No files.  Try \`$0 --help' for more information." 1>&2
+     echo "$0: No files.  Try '$0 --help' for more information." 1>&2
      exit 1;
      ;;
   -h | --h*)
     cat <<\EOF
 Usage: elisp-comp [--help] [--version] FILES...
 
-This script byte-compiles all `.el' files listed as FILES using GNU
-Emacs, and put the resulting `.elc' files into the current directory,
-so disregarding the original directories used in `.el' arguments.
+This script byte-compiles all '.el' files listed as FILES using GNU
+Emacs, and put the resulting '.elc' files into the current directory,
+so disregarding the original directories used in '.el' arguments.
 
 This script manages in such a way that all Emacs LISP files to
 be compiled are made visible between themselves, in the event
@@ -71,14 +70,14 @@ trap "ret=130; $do_exit" 2
 trap "ret=141; $do_exit" 13
 trap "ret=143; $do_exit" 15
 
-mkdir $tempdir
-cp "$@" $tempdir
+# mkdir $tempdir
+# cp "$@" $tempdir
 
 (
-  cd $tempdir
-  echo "(setq load-path (cons nil load-path))" > script
+  # cd $tempdir
+  echo "(setq load-path (cons nil (cons \"$abs_srcdir\" load-path)))" > script
   $EMACS -batch -q -l script -f batch-byte-compile *.el || exit $?
-  mv *.elc ..
+  # mv *.elc ..
 ) || exit $?
 
 (exit 0); exit 0
