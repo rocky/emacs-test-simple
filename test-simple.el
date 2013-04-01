@@ -1,7 +1,7 @@
 ;;; test-simple.el --- Simple Unit Test Framework for Emacs Lisp
 ;; Rewritten from Phil Hagelberg's behave.el by rocky
 
-;; Copyright (C) 2010, 2012 Rocky Bernstein
+;; Copyright (C) 2010, 2012, 2013 Rocky Bernstein
 
 ;; Author: Rocky Bernstein
 ;; URL: http://github.com/rocky/emacs-test-simple
@@ -107,6 +107,7 @@
     (setf (test-info-description test-info) description)
     ))
 
+;;;###autoload
 (defmacro test-simple-start (&optional test-start-msg)
   `(test-simple-clear nil
 		      (or ,test-start-msg
@@ -115,6 +116,7 @@
 			    (buffer-name)))
 		      ))
 
+;;;###autoload
 (defun test-simple-clear (&optional test-info test-start-msg)
   "Initializes and resets everything to run tests. You should run
 this before running any assertions. Running more than once clears
