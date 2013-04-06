@@ -43,7 +43,7 @@
 ;; * Accomodates both interactive and noninteractive use
 ;;    - For interactive use, one can use eval-last-sexp, eval-region,
 ;;      and eval-buffer. One can edebug the code.
-;; * -  For non-interactive use is run via use run as
+;;    -  For non-interactive use is run as
 ;;        emacs --batch --no-site-file --no-splash --load <your-lisp-code.el>
 ;;
 ;; Here is an example using gcd.el found in the examples directory.
@@ -76,7 +76,7 @@
 ;;    ......
 ;;    0 failures in 6 assertions (0.002646 seconds)
 ;;
-;; Now let’s try from a command line:
+;; Now let us try from a command line:
 ;;
 ;;    $ emacs --batch --no-site-file --no-splash --load test-gcd.el
 ;;    Loading /src/external-vcs/emacs-test-simple/example/gcd.el (source)...
