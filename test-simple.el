@@ -10,35 +10,30 @@
 
 ;; This file is NOT part of GNU Emacs.
 
-;; This is free software; you can redistribute it and/or modify it under
-;; the terms of the GNU General Public License as published by the Free
-;; Software Foundation; either version 3, or (at your option) any later
-;; version.
+;; This program is free software: you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License as
+;; published by the Free Software Foundation, either version 3 of the
+;; License, or (at your option) any later version.
 
-;; This file is distributed in the hope that it will be useful, but
+;; This program is distributed in the hope that it will be useful, but
 ;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 ;; General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with Emacs; see the file COPYING, or type `C-h C-c'. If not,
-;; write to the Free Software Foundation at this address:
-
-;;   Free Software Foundation
-;;   51 Franklin Street, Fifth Floor
-;;   Boston, MA 02110-1301
-;;   USA
+;; along with this program.  If not, see
+;; <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
 ;; test-simple.el is:
 ;;
 ;; * Simple. No need for
-;;   - contexts,
-;;   - specifications,
-;;   - test tags.
+;;   - context macros,
+;;   - enclosing specifications,
+;;   - required test tags.
 ;;   But if you want, you still can add custom assert failure messages or
-;;   add notes before a group of tests.
+;;   add note messages before a group of tests.
 ;;
 ;; * Accomodates both interactive and noninteractive use
 ;;    - For interactive use, one can use eval-last-sexp, eval-region,
