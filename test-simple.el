@@ -31,40 +31,62 @@
 
 ;;; Commentary:
 
-;; test-simple.el allows you to write tests for your Emacs Lisp
-;; code.  Executable specifications allow you to check that your code
-;; is working correctly in an automated fashion that you can use to
-;; drive the focus of your development.  (It's related to Test-Driven
-;; Development.) You can read up on it at http://behaviour-driven.org.
-
-;; Assertions may have docstrings so that when the specifications
-;; aren't met it is easy to see what caused the failure.
-
-;; When "note" is used subsequent tests are grouped assumed to be
-;; related to that not.
-
-;; When you want to run the specs, evaluate the buffer.  Or evaluate
-;; individual assertions.  Results are save in the
-;; *test-simple* buffer.
-
-;;; Implementation
-
-;; Contexts are stored in the *test-simple-contexts* list as structs.  Each
-;; context has a "specs" slot that contains a list of its specs, which
-;; are stored as closures.  The expect form ensures that expectations
-;; are met and signals test-simple-spec-failed if they are not.
-
-;; Warning: the variable CONTEXT is used within macros
-;; in such a way that they could shadow variables of the same name in
-;; the code being tested.  Future versions will use gensyms to solve
-;; this issue, but in the mean time avoid relying upon variables with
-;; those names.
+;; test-simple.el is:
+;;
+;; * Simple. No need for
+;;   - contexts,
+;;   - specifications,
+;;   - test tags.
+;;   But if you want, you still can add custom assert failure messages or
+;;   add notes before a group of tests.
+;;
+;; * Accomodates both interactive and noninteractive use
+;;    - For interactive use, one can use eval-last-sexp, eval-region,
+;;      and eval-buffer. One can edebug the code.
+;; * -  For non-interactive use is run via use run as
+;;        emacs --batch --no-site-file --no-splash --load <your-lisp-code.el>
+;;
+;; Here is an example using gcd.el found in the examples directory.
+;;
+;;   (require 'test-simple)
+;;   (test-simple-start) ;; Zero counters and start the stop watch.
+;;
+;;   ;; Use (load-file) below because we want to always to read the source.
+;;   ;; Also, we don't want no stinking compiled source.
+;;   (assert-t (load-file "./gcd.el")
+;; 	      "Can't load gcd.el - are you in the right directory?" )
+;;
+;;   (note "degenerate cases")
+;;
+;;   (assert-nil (gcd 5 -1) "using positive numbers")
+;;   (assert-nil (gcd -4 1) "using positive numbers, switched order")
+;;   (assert-raises error (gcd "a" 32)
+;;                  "Passing a string value should raise an error")
+;;
+;;   (note "GCD computations")
+;;   (assert-equal 1 (gcd 3 5) "gcd(3,5)")
+;;   (assert-equal 8 (gcd 8 32) "gcd(8,32)")
+;;   (end-tests) ;; Stop the clock and print a summary
+;;
+;; Edit (with Emacs of course) test-gcd.el and run M-x eval-current-buffer
+;;
+;; You should see in buffer *test-simple*:
+;;
+;;    test-gcd.el
+;;    ......
+;;    0 failures in 6 assertions (0.002646 seconds)
+;;
+;; Now let’s try from a command line:
+;;
+;;    $ emacs --batch --no-site-file --no-splash --load test-gcd.el
+;;    Loading /src/external-vcs/emacs-test-simple/example/gcd.el (source)...
+;;    *scratch*
+;;    ......
+;;    0 failures in 6 assertions (0.000723 seconds)
 
 ;;; To do:
 
 ;; Main issues: more expect predicates
-
-;;; Usage:
 
 (require 'time-date)
 
