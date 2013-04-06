@@ -1,31 +1,36 @@
-AC_INIT(emacs-test-simple, 0.02vc,)
+dnl FIXME: pick up from test-simple.el
+AC_INIT(emacs-test-simple, 0.2.0,)
 AC_CONFIG_SRCDIR(test-simple.el)
+AM_INIT_AUTOMAKE([foreign])
+AM_MAINTAINER_MODE
+
 AC_PATH_PROG([EMACS], [emacs], [emacs])
+AC_MSG_NOTICE("Checking emacs version and prerequiste packages")
+$EMACS -batch -q -no-site-file -eval \
+  '(if (<= emacs-major-version 22)
+       (progn
+         (error "You need GNU Emacs 23 or better.")
+         (kill-emacs 1)
+       )
+     (dolist (package (quote (loc-changes load-relative test-simple)))
+        (require package))
+   )'
+if test $? -ne 0 ; then
+    AC_MSG_ERROR([Can't continue until above error is corrected.])
+fi
 
 ##################################################################
 # See if --with-lispdir was set. If not, set it to a reasonable default
 # based on where bash thinks bashdb is supposed to be installed.
 ##################################################################
 
+AM_MISSING_PROG(GIT2CL, git2cl, $missing_dir)
+
 # Check whether --with-lispdir was given.
 if test "${with_lispdir+set}" = set; then :
 else
    mydir=$(dirname $0)
    with_lispdir=$(EMACS_PROG=$EMACS $SH_PROG $mydir/compute-lispdir.sh)
-fi
-
-AM_INIT_AUTOMAKE([foreign])
-AM_MAINTAINER_MODE
-AM_MISSING_PROG(GIT2CL, git2cl, $missing_dir)
-
-$EMACS -batch -q -no-site-file -eval \
-  '(if (<= emacs-major-version 22)
-     (progn
-       (error "You need GNU Emacs 23 or better.")
-       (kill-emacs 1)
-     ))'
-if test $? -ne 0 ; then
-    AC_MSG_ERROR([Can't continue with this version of Emacs])
 fi
 
 ##
