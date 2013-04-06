@@ -45,6 +45,8 @@
 # To finish here is an invocation using all 3 above options:
 #   GIT_PROTOCOL='git' SUDO_CMD=' ' sh ./install-from-git.sh --prefix=/tmp
 
+GIT_PROTOCOL=${GIT_PROTOCOL:-http}
+
 run_cmd() {
     echo "--- Running command: $@"
     $@
@@ -78,7 +80,7 @@ for program in git make $try_cmd ; do
 done
 
 packages=emacs-test-unit
-for pkg in $packages ; do 
+for pkg in $packages ; do
     echo '******************************************'
     echo Trying to install ${pkg}...
     echo '******************************************'
