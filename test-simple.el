@@ -35,11 +35,11 @@
 ;;   But if you want, you still can add custom assert failure messages or
 ;;   add note messages before a group of tests.
 ;;
-;; * Accomodates both interactive and noninteractive use
+;; * Accomodates both interactive and non-interactive use
 ;;    - For interactive use, one can use eval-last-sexp, eval-region,
 ;;      and eval-buffer. One can edebug the code.
 ;;    -  For non-interactive use is run as
-;;        emacs --batch --no-site-file --no-splash --load <your-lisp-code.el>
+;;        emacs --batch --no-site-file --no-splash --load <test-lisp-code.el>
 ;;
 ;; Here is an example using gcd.el found in the examples directory.
 ;;
