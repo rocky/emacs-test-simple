@@ -1,5 +1,5 @@
-*~
 *elc
+*~
 /Makefile
 /Makefile.in
 /aclocal.m4
@@ -10,3 +10,4 @@
 /elc-stamp
 /install-sh
 /missing
+/script
