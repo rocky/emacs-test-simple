@@ -10,9 +10,8 @@ script to pick that up from git sources. For this, you will need:
 If you are feeling lucky, you can try running the install script from the github repository:
 
     $ bash < <( curl https://raw.github.com/rocky/emacs-test-simple/master/install-from-git.sh )
-```
 
-Otherwise, 
+Otherwise:
 
    git clone http://github.com/rocky/emacs-test-simple
    cd emacs-test-simple
