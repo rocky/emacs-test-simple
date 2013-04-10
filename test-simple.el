@@ -32,13 +32,15 @@
 ;;   - context macros,
 ;;   - enclosing specifications,
 ;;   - required test tags.
-;;   But if you want, you still can add custom assert failure messages or
-;;   add note messages before a group of tests.
 ;;
-;; * Accomodates both interactive and non-interactive use
-;;    - For interactive use, one can use eval-last-sexp, eval-region,
-;;      and eval-buffer. One can edebug the code.
-;;    -  For non-interactive use is run as
+;;   But if you want, you still can enclose tests in a local scope,
+;;   add customized assert failure messages, or add summary messages
+;;   before a group of tests.
+;;
+;; * Accomodates both interactive and non-interactive use.
+;;    - For interactive use, one can use `eval-last-sexp', `eval-region',
+;;      and `eval-buffer'. One can `edebug' the code.
+;;    -  For non-interactive use, run:
 ;;        emacs --batch --no-site-file --no-splash --load <test-lisp-code.el>
 ;;
 ;; Here is an example using gcd.el found in the examples directory.
