@@ -79,17 +79,3 @@ for program in git make $try_cmd ; do
     fi
 done
 
-packages=emacs-test-unit
-for pkg in $packages ; do
-    echo '******************************************'
-    echo Trying to install ${pkg}...
-    echo '******************************************'
-    run_cmd git clone ${GIT_PROTOCOL}://github.com/rocky/${pkg}.git
-    (cd $pkg && \
-        run_cmd $SHELL ./autogen.sh && \
-	run_cmd ./configure $@ && \
-	run_cmd make && \
-	run_cmd make check && \
-        run_cmd $need_sudo make install
-    )
-done
