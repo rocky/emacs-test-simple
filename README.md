@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/rocky/emacs-test-simple.png)](https://travis-ci.org/rocky/[emacs-test-simple])
+[![Build Status](https://travis-ci.org/rocky/emacs-test-simple.png)](https://travis-ci.org/rocky/emacs-test-simple)
 
 *test-simple.el* is :
 
