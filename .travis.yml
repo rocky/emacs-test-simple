@@ -1,6 +1,6 @@
 language: emacs
 
-install: make get-deps
+install:
   # Install emacs.
   - "sudo apt-get install emacs-23-lucid"
 
