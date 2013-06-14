@@ -66,3 +66,6 @@ Now let's try from a command line:
     *scratch*
     ......
     0 failures in 6 assertions (0.000723 seconds)
+
+*Author:*  Rocky Bernstein <rocky@gnu.org> <br>
+[![endorse](https://api.coderwall.com/rocky/endorsecount.png)](https://coderwall.com/rocky)
