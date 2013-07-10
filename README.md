@@ -7,7 +7,7 @@
   * For interactive use one can use `eval-last-sexp`, `eval-region`, and `eval-buffer`
   * For non-interactive use run as: `emacs --batch --no-site-file --no-splash --load <test-lisp-code.el>`
 
-I use this my [Debugger front end](https://github.com/rocky/emacs-dbgr).
+I use this in my [Debugger front end](https://github.com/rocky/emacs-dbgr).
 
 Here is an example found in the [examples directory](https://github.com/rocky/emacs-test-simple/tree/master/test).
 
