@@ -1,0 +1,4 @@
+(source "melpa" "http://melpa.milkbox.net/packages/")
+
+(package "test-simple" "0.2.1"
+	 "Unit tests for GNU emacs that work interactively and in batch")

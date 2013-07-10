@@ -6,7 +6,7 @@
 ;; Author: Rocky Bernstein
 ;; URL: http://github.com/rocky/emacs-test-simple
 ;; Keywords: unit-test
-;; Version: 0.2.0
+;; Version: 0.2.1
 
 ;; This file is NOT part of GNU Emacs.
 
