@@ -27,16 +27,18 @@ AM_MISSING_PROG(GIT2CL, git2cl, $missing_dir)
 # Check whether --with-lispdir was given.
 if test "${with_lispdir+set}" = set; then :
 else
-   mydir=$(dirname $0)
-   with_lispdir=$(EMACS_PROG=$EMACS $SH_PROG $mydir/compute-lispdir.sh)
+  my_lispdir=$(EMACS_PROG=$EMACS $SH_PROG $(dirname $0)/compute-lispdir.sh)
+  if test "${my_lispdir+set}" = set; then :
+    with_lispdir=$my_lispdir
+    echo "'compute-lispdir.sh' lispdir install directory override: '$with_lispdir'"
+  fi
 fi
 
 ##
 ## Find out where to install the debugger emacs lisp files
 ##
 AM_PATH_LISPDIR
+AM_CONDITIONAL(INSTALL_EMACS_LISP, test "x$lispdir" != "x")
 
 AC_CONFIG_FILES([Makefile test/Makefile])
 AC_OUTPUT
-echo
-echo "Install lisp directory set to $with_lispdir"
