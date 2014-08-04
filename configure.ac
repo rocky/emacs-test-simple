@@ -25,7 +25,7 @@ fi
 AM_MISSING_PROG(GIT2CL, git2cl, $missing_dir)
 
 # Check whether --with-lispdir was given.
-if test "${with_lispdir+set}" = set; then :
+if test "${with_lispdir+set}" = set -o "${prefix+set}" = set; then :
 else
   my_lispdir=$(EMACS_PROG=$EMACS $SH_PROG $(dirname $0)/compute-lispdir.sh)
   if test "${my_lispdir+set}" = set; then :
