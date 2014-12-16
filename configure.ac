@@ -1,5 +1,5 @@
 dnl FIXME: pick up from test-simple.el
-AC_INIT(emacs-test-simple, 0.2.0,)
+AC_INIT(emacs-test-simple, 1.0,)
 AC_CONFIG_SRCDIR(test-simple.el)
 AM_INIT_AUTOMAKE([foreign])
 AM_MAINTAINER_MODE
