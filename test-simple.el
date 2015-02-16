@@ -6,7 +6,7 @@
 ;; Author: Rocky Bernstein <rocky@gnu.org>
 ;; URL: http://github.com/rocky/emacs-test-simple
 ;; Keywords: unit-test
-;; Version: 1.0
+;; Version: 1.1
 
 ;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
