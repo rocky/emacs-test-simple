@@ -20,7 +20,7 @@ check: $(test-files)
 README: README.textile
 	ln -s README.md README
 
-PHONY=check clean dist distclean test check-short check-terse install-short
+PHONY=check check_copyrights clean dist distclean test check-short check-terse install-short
 
 if MAINTAINER_MODE
 
@@ -44,3 +44,21 @@ check-terse:
 #: Run "make install"
 install-short:
 	$(MAKE) install 2>&1  | $(RUBY) make-check-filter.rb
+
+CR_EXCEPTIONS=copyright_exceptions
+#: Check for GNU Copyrights.
+check_copyrights:
+	@echo "Compute exceptions >$(CR_EXCEPTIONS)~"
+	@export LANG=C;							\
+	find . -name '.git' -prune -o -name '*.el' -print0 |		\
+	    xargs -0 grep -L 'Free Software Foundation, Inc' |		\
+	    grep -v '\(\.dir-locals\|.-\(pkg\|autoloads\)\)\.el$$';	\
+	find . -name '.git' -prune -o -name '*.el' -print |		\
+	    while read f; do						\
+	        fquoted="$$(echo $$f|tr '|' '_')";			\
+	        sed -n -e '/[Cc]opyright.*, *[1-9][-0-9]*,\?$$/N'	\
+	            -e '/Free Software Foundation/d'			\
+	            -e "s|^\\(.*[Cc]opyright\\)|$$fquoted:\\1|p" 	\
+	           "$$f";						\
+	    done | sort >$(CR_EXCEPTIONS)~
+	diff -u "$(CR_EXCEPTIONS)" "$(CR_EXCEPTIONS)~"
