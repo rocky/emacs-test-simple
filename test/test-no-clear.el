@@ -1,11 +1,6 @@
 ;;; test-simple.el --- Simple Unit Test Framework for Emacs Lisp
 ;; Copyright (C) 2015 Free Software Foundation, Inc
-
 ;; Author: Rocky Bernstein <rocky@gnu.org>
-;; URL: http://github.com/rocky/emacs-test-simple
-;; Keywords: unit-test
-;; Version: 1.0
-
 ;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
 ;; published by the Free Software Foundation, either version 3 of the
