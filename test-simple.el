@@ -170,7 +170,7 @@ out information from the previous run."
 				  error-condition))))
     (list 'condition-case nil
 	  (list 'progn body
-		(list 'assert-t nil fail-message test-info))
+		(list 'assert-t nil fail-message))
 	  (list error-condition '(assert-t t)))))
 
 (defun assert-op (op expected actual &optional fail-message test-info)
