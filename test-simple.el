@@ -183,7 +183,7 @@ out information from the previous run."
 		  (format "Message: %s" fail-message)
 		""))
 	     (expect-message
-	      (format "\n  Expected: %s\n  Got: %s" expected actual))
+	      (format "\n  Expected: %S\n  Got: %S" expected actual))
 	     (test-info-mess
 	      (if (boundp 'test-info)
 		  (test-info-description test-info)
