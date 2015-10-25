@@ -28,7 +28,7 @@ In file `gcd.el`:
     )
 
 
-In file `test-gcd.el` in the same directory:
+In file `gcd-tests.el` in the same directory:
 
     (require 'test-simple)
     (test-simple-start) ;; Zero counters and start the stop watch.
@@ -51,17 +51,17 @@ In file `test-gcd.el` in the same directory:
 
     (end-tests) ;; Stop the clock and print a summary
 
-Edit (with Emacs of course) `test-gcd.el` and run `M-x eval-current-buffer`
+Edit (with Emacs of course) `gcd-tests.el` and run `M-x eval-current-buffer`
 
 You should see in buffer `*test-simple*`:
 
-    test-gcd.el
+    gcd-tests.el
     ......
     0 failures in 6 assertions (0.002646 seconds)
 
 Now let's try from a command line:
 
-    $ emacs --batch --no-site-file --no-splash --load test-gcd.el
+    $ emacs --batch --no-site-file --no-splash --load gcd-tests.el
     Loading /src/external-vcs/emacs-test-simple/example/gcd.el (source)...
     *scratch*
     ......
