@@ -34,14 +34,15 @@ endif
 #: Run all tests
 test: check
 
+#: Run all tests with reduced versbosity
 check-short:
 	$(MAKE) -C test check 2>&1  | ruby make-check-filter.rb
 
-#: Run all tests without and show just the failure lines
+#: Run tests showing only the failure lines; See also check-short
 check-terse:
 	$(MAKE) check 2>&1  | $(RUBY) make-check-filter.rb | grep failure
 
-#: Run "make install"
+#: Run "make install" with reduced verbosity
 install-short:
 	$(MAKE) install 2>&1  | $(RUBY) make-check-filter.rb
 
