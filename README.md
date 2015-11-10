@@ -5,7 +5,7 @@
 * Simple -- no need for context macros, enclosing specifications, or required test tags. But if you want, you still can add custom assert failure messages or add notes before a group of tests.
 * Accomodates both interactive and non-interactive use:
   * For interactive use one can use `eval-last-sexp`, `eval-region`, and `eval-buffer`
-  * For non-interactive use run as: `emacs --batch --no-site-file --no-splash --load <test-lisp-code.el>`
+  * For non-interactive use run as: `emacs --batch --no-site-file --no-splash --load <test-lisp-code.el>`, or `test-simple-run`
 
 I use this in my [Debugger front end](https://github.com/rocky/emacs-dbgr).
 
@@ -66,6 +66,22 @@ Now let's try from a command line:
     *scratch*
     ......
     0 failures in 6 assertions (0.000723 seconds)
+
+
+You can run noninteractive tests inside Emacs by `test-simple-run`.
+Add the following at a test file:
+
+    ;;;; (test-simple-run "emacs -batch -L %s -l %s" (file-name-directory (locate-library "test-simple.elc")) buffer-file-name)
+
+Press C-x C-e at the `test-simple-run` line to run this test file.
+Then press C-x C-z, which is customizable by `test-simple-runner-key`, to run it more.
+If you have installed `bpr` package, use it by default because it only pops up window when the running program exits abnormally.
+
+`test-simple-run` can be called interactively.
+In this case, the command line is set above as the simplest case.
+But you run test with dependency, you must use the sexp comment form.
+
+    ;;;; (test-simple-run "emacs -batch -L %s -L %s -l %s" (file-name-directory (locate-library "test-simple.elc")) (file-name-directory (locate-library "foo")) buffer-file-name)
 
 *Author:*  Rocky Bernstein <rocky@gnu.org> <br>
 [![endorse](https://api.coderwall.com/rocky/endorsecount.png)](https://coderwall.com/rocky)
