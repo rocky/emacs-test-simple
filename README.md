@@ -67,5 +67,15 @@ Now let's try from a command line:
     ......
     0 failures in 6 assertions (0.000723 seconds)
 
+
+You can run noninteractive tests inside Emacs by `test-simple-run`.
+Add the following at a test file:
+
+    ;;;; (test-simple-run "emacs -batch -L %s -l %s" (file-name-directory (locate-library "test-simple.elc")) buffer-file-name)
+
+Press C-x C-e at the `test-simple-run` line to run this test file.
+Then press C-x C-z, which is customizable by `test-simple-runner-key`, to run it more.
+If you have installed `bpr` package, use it by default because it only pops up window when the running program exits abnormally.
+
 *Author:*  Rocky Bernstein <rocky@gnu.org> <br>
 [![endorse](https://api.coderwall.com/rocky/endorsecount.png)](https://coderwall.com/rocky)
