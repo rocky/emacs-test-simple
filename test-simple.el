@@ -1,4 +1,4 @@
-;;; test-simple.el --- Simple Unit Test Framework for Emacs Lisp
+;;; test-simple.el --- Simple Unit Test Framework for Emacs Lisp -*- lexical-binding: t -*-
 ;; Rewritten from Phil Hagelberg's behave.el by rocky
 
 ;; Copyright (C) 2015 Free Software Foundation, Inc
@@ -96,6 +96,26 @@
   (require 'cl)
   )
 (require 'cl)
+
+(defgroup test-simple nil
+  "Simple Unit Test Framework for Emacs Lisp"
+  :group 'lisp)
+
+(defcustom test-simple-runner-interface (if (fboundp 'bpr-spawn)
+                                            'bpr-spawn
+                                          'compile)
+  "Function with one string argument when running tests non-interactively.
+Command line started with `emacs --batch' is passed as the argument.
+
+`bpr-spawn', which is in bpr package, is preferable because of no window popup.
+If bpr is not installed, fall back to `compile'."
+  :type 'function
+  :group 'test-simple)
+
+(defcustom test-simple-runner-key "C-x C-z"
+  "Key to run non-interactive test after defining command line by `test-simple-run'."
+  :type 'string
+  :group 'test-simple)
 
 (defvar test-simple-debug-on-error nil
   "If non-nil raise an error on the first failure.")
@@ -329,6 +349,21 @@ funnel down to this one, ASSERT-TYPE is an optional type."
   (unless test-info (setq test-info test-simple-info))
   (goto-char (point-max))
   (test-simple-msg (test-simple-summary-line test-info)))
+
+;;;###autoload
+(defun test-simple-run (&rest command-line-formats)
+  "Register command line to run tests non-interactively and bind key to run test.
+After calling this function, you can run test by key specified by `test-simple-runner-key'.
+
+It is preferable to write at the first line of test files as a comment, e.g,
+;;;; (test-simple-run \"emacs -batch -L %s -l %s\" (file-name-directory (locate-library \"test-simple.elc\")) buffer-file-name)
+"
+  (let ((func (lambda ()
+                (interactive)
+                (funcall test-simple-runner-interface
+                         (apply 'format command-line-formats)))))
+    (global-set-key (kbd test-simple-runner-key) func)
+    (funcall func)))
 
 (provide 'test-simple)
 ;;; test-simple.el ends here
