@@ -357,7 +357,14 @@ After calling this function, you can run test by key specified by `test-simple-r
 
 It is preferable to write at the first line of test files as a comment, e.g,
 ;;;; (test-simple-run \"emacs -batch -L %s -l %s\" (file-name-directory (locate-library \"test-simple.elc\")) buffer-file-name)
-"
+
+Calling this function interactively, COMMAND-LINE-FORMATS is set above."
+  (interactive)
+  (setq command-line-formats
+        (or command-line-formats
+            (list "emacs -batch -L %s -l %s"
+                  (file-name-directory (locate-library "test-simple.elc"))
+                  buffer-file-name)))
   (let ((func (lambda ()
                 (interactive)
                 (funcall test-simple-runner-interface
