@@ -365,5 +365,15 @@ It is preferable to write at the first line of test files as a comment, e.g,
     (global-set-key (kbd test-simple-runner-key) func)
     (funcall func)))
 
+(defun test-simple-noninteractive-kill-emacs-hook ()
+  "Emacs exits abnormally when noninteractive test fails."
+  (when (and noninteractive test-simple-info
+             (<= 1 (test-info-failure-count test-simple-info)))
+    (let (kill-emacs-hook)
+     (kill-emacs 1))))
+(when noninteractive
+  (add-hook 'kill-emacs-hook 'test-simple-noninteractive-kill-emacs-hook))
+
+
 (provide 'test-simple)
 ;;; test-simple.el ends here
