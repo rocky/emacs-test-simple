@@ -35,7 +35,7 @@
 ;;   add customized assert failure messages, or add summary messages
 ;;   before a group of tests.
 ;;
-;; * Accomodates both interactive and non-interactive use.
+;; * Accommodates both interactive and non-interactive use.
 ;;    - For interactive use, one can use `eval-last-sexp', `eval-region',
 ;;      and `eval-buffer'. One can `edebug' the code.
 ;;    -  For non-interactive use, run:

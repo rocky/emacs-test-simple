@@ -3,7 +3,7 @@
 *test-simple.el* is :
 
 * Simple -- no need for context macros, enclosing specifications, or required test tags. But if you want, you still can add custom assert failure messages or add notes before a group of tests.
-* Accomodates both interactive and non-interactive use:
+* Accommodates both interactive and non-interactive use:
   * For interactive use one can use `eval-last-sexp`, `eval-region`, and `eval-buffer`
   * For non-interactive use run as: `emacs --batch --no-site-file --no-splash --load <test-lisp-code.el>`, or `test-simple-run`
 
