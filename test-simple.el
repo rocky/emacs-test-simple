@@ -184,7 +184,7 @@ out information from the previous run."
 ;; Assertion tests
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmacro assert-raises (error-condition body &optional fail-message test-info)
+(defmacro assert-raises (error-condition body &optional fail-message)
   (let ((fail-message (or fail-message
 			  (format "assert-raises did not get expected %s"
 				  error-condition))))
@@ -246,12 +246,11 @@ out information from the previous run."
 
 (defun assert-t (actual &optional fail-message test-info)
   "expectation is that ACTUAL is not nil."
-  (assert-nil (not actual) fail-message test-info "assert-t"))
+  (assert-nil (not actual) fail-message test-info))
 
-(defun assert-nil (actual &optional fail-message test-info assert-type)
+(defun assert-nil (actual &optional fail-message test-info)
   "expectation is that ACTUAL is nil. FAIL-MESSAGE is an optional
-additional message to be displayed. Since several assertions
-funnel down to this one, ASSERT-TYPE is an optional type."
+additional message to be displayed."
   (unless test-info (setq test-info test-simple-info))
   (incf (test-info-assert-count test-info))
   (if actual
@@ -271,10 +270,9 @@ funnel down to this one, ASSERT-TYPE is an optional type."
   (incf (test-info-failure-count test-info))
   (let ((failure-msg
 	 (format "\nDescription: %s, type %s\n%s" test-info-msg type fail-msg))
-	(old-read-only inhibit-read-only)
 	)
     (save-excursion
-      (not-ok-msg fail-msg)
+      (not-ok-msg)
       (test-simple-msg failure-msg 't)
       (unless noninteractive
 	(if test-simple-debug-on-error
@@ -321,7 +319,7 @@ funnel down to this one, ASSERT-TYPE is an optional type."
       (test-simple-msg msg))
   't)
 
-(defun not-ok-msg(fail-message &optional test-info)
+(defun not-ok-msg(&optional test-info)
   (unless test-info (setq test-info test-simple-info))
   (let ((msg (if (getenv "USE_TAP")
 		 (format "not ok %d\n" (test-info-assert-count test-info))
