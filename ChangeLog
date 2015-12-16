@@ -1,0 +1,323 @@
+2015-11-11  R. Bernstein <rocky@users.noreply.github.com>
+
+	* : Merge pull request #10 from syohex/switch-to-cask Switch from Carton to Cask
+
+2015-11-10  rocky <rocky@gnu.org>
+
+	* README.md, test-simple.el: A spelling typo
+
+2015-11-10  rocky <rocky@gnu.org>
+
+	* test-simple.el: Remove unused lexical variables noted in byte
+	compilation
+
+2015-11-10  R. Bernstein <rocky@users.noreply.github.com>
+
+	* : Merge pull request #9 from rubikitch/test-runner I improved noninteractive test. Thanks!
+
+2015-11-11  rubikitch <rubikitch@ruby-lang.org>
+
+	* test-simple.el: test-simple-run: make it a command.
+
+2015-11-11  rubikitch <rubikitch@ruby-lang.org>
+
+	* .travis.yml: .travis.yml: Drop support of Emacs23 (Test in
+	Emacs24)
+
+2015-11-10  rubikitch <rubikitch@ruby-lang.org>
+
+	* README.md: Mention test-simple-run in README.md
+
+2015-11-10  rubikitch <rubikitch@ruby-lang.org>
+
+	* example/gcd-tests.el: gcd-tests.el: Add test-simple-run comment
+	line
+
+2015-11-10  rubikitch <rubikitch@ruby-lang.org>
+
+	* test-simple.el: Emacs exits abnormally when noninteractive test
+	fails.
+
+2015-11-10  rubikitch <rubikitch@ruby-lang.org>
+
+	* test-simple.el: New function `test-simple-run': register test You can run tests easily by pressing C-x C-z.
+
+2015-10-25  rocky <rocky@gnu.org>
+
+	* Makefile.am: Document targets "check-short" and "install-short"
+
+2015-10-25  R. Bernstein <rocky@users.noreply.github.com>
+
+	* : Merge pull request #8 from rubikitch/rename-test-filename Rename test-gcd.el -> gcd-tests.el to comply with Melpa
+
+2015-10-22  R. Bernstein <rocky@users.noreply.github.com>
+
+	* : Merge pull request #6 from rubikitch/better-failure-message Use %S to print expected/actual message.
+
+2015-03-31  rocky <rocky@gnu.org>
+
+	* Makefile.am, test-simple.el: Wrong number of args in test-raises
+
+2015-02-16  rocky <rocky@gnu.org>
+
+	* test/test-basic.el, test/test-fns.el, test/test-no-clear.el: 
+	Reduce boilerplate verbiage
+
+2015-02-15  rocky <rocky@gnu.org>
+
+	* test-simple.el: Bump version #
+
+2015-02-15  rocky <rocky@gnu.org>
+
+	* Makefile.am, copyright_exceptions, example/gcd.el,
+	example/test-gcd.el, test-simple.el, test/test-basic.el,
+	test/test-fns.el, test/test-no-clear.el: Assign FSF Copyright and
+	boilerplate.
+
+2015-02-13  rocky <rocky@gnu.org>
+
+	* COPYING: Use GPL3
+
+2014-12-16  rocky <rocky@gnu.org>
+
+	* test-simple.el: Release 1.0
+
+2014-12-16  rocky <rocky@gnu.org>
+
+	* NEWS, configure.ac: 1.0 release
+
+2014-08-04  rocky <rocky@gnu.org>
+
+	* Makefile.am, make-check-filter.rb: Go over Makefile.am. Add
+	check-terse and install-terse
+
+2014-08-04  R. Bernstein <rocky@users.noreply.github.com>
+
+	* : Merge pull request #4 from mar-kolya/fix-configure-prefix Fix configure --prefix
+
+2014-03-26  rocky <rocky@gnu.org>
+
+	* test-simple.el: assert-raises was passing an extra arg to
+	assert-t.
+
+2013-09-23  R. Bernstein <rockyb@rubyforge.org>
+
+	* : Merge pull request #2 from elbeardmorez/autoreconf autoreconf, don't force update
+
+2013-09-23  Pete Beardmore <pete.beardmore@msn.com>
+
+	* configure.ac: autoconf, fall back to default datadir install
+	location
+
+2013-09-23  Pete Beardmore <pete.beardmore@msn.com>
+
+	* autogen.sh: autoreconf, don't force update
+
+2013-07-10  rocky <rocky@gnu.org>
+
+	* README.md: grammar typo
+
+2013-07-10  rocky <rocky@gnu.org>
+
+	* Carton, test-simple.el: Try using Carton packaging
+
+2013-06-14  rocky <rocky@gnu.org>
+
+	* README.md: Add coderwall endorse
+
+2013-06-13  rocky <rocky@gnu.org>
+
+	* install-from-git.sh: Put back in git clone of emacs-test-simple
+
+2013-06-13  rocky <rocky@gnu.org>
+
+	* README.md: Correct travis status image link
+
+2013-06-13  rocky <rocky@gnu.org>
+
+	* configure.ac, elisp-comp: This emacs package doesn't need any
+	other of my emacs packages
+
+2013-06-13  rocky <rocky@gnu.org>
+
+	* .travis.yml: Try travis build with emacs23-nox
+
+2013-06-13  rocky <rocky@gnu.org>
+
+	* .travis.yml: Is this .travis.yml okay now?
+
+2013-06-13  rocky <rocky@gnu.org>
+
+	* .gitignore, .travis.yml, README.md, autogen.sh: Try travis
+
+2013-06-12  rocky <rocky@gnu.org>
+
+	* : commit 8dffab4a27d99dc78b9b6e35b300b90eccfa7078 Author: rocky
+	<rocky@gnu.org> Date:   Wed Jun 12 05:22:14 2013 -0400
+
+2013-04-10  rocky <rocky@gnu.org>
+
+	* test-simple.el: Go over documentation yet again.
+
+2013-04-06  rocky <rocky@gnu.org>
+
+	* configure.ac: tidy organization of configure.ac
+
+2013-04-06  rocky <rocky@gnu.org>
+
+	* compute-lispdir.sh, configure.ac, install-from-git.sh: 
+	install-from-git.sh: forgot to set protocol. rest: Attempt to figure
+	out a reasonable lispdir setting (--with-lispdir).
+
+2013-04-06  rocky <rocky@gnu.org>
+
+	* .gitignore, install-from-git.sh: Go over install-from-git.sh
+
+2013-04-06  rocky <rocky@gnu.org>
+
+	* INSTALL: One more change
+
+2013-04-06  rocky <rocky@gnu.org>
+
+	* INSTALL, Makefile.am, README.md, README.textile, test-simple.el: 
+	Go over install instructions.
+
+2013-04-06  rocky <rocky@gnu.org>
+
+	* test-simple.el: Yet more doc text tweaking
+
+2013-04-06  rocky <rocky@gnu.org>
+
+	* test-simple.el: More doc fixes
+
+2013-04-05  rocky <rocky@gnu.org>
+
+	* test-simple.el: Revise documentation.
+
+2013-04-01  rocky <rocky@gnu.org>
+
+	* elisp-comp: Reinstate old elisp-comp.
+
+2013-04-01  rocky <rocky@gnu.org>
+
+	* test-simple.el: Add a couple of autoloads
+
+2013-04-01  rocky <rocky@gnu.org>
+
+	* Makefile.am, THANKS: Thanks to Lars expez
+
+2013-04-01  R. Bernstein <rockyb@rubyforge.org>
+
+	* : Merge pull request #1 from expez/package Changes to be compatible with melpa
+
+2013-03-27  Expez <mrgrandmother@gmail.com>
+
+	* test-simple.el: Add required version header.
+
+2013-03-27  Expez <mrgrandmother@gmail.com>
+
+	* test-simple.el: Remove trailing whitespace.
+
+2012-08-25  rocky <rocky@gnu.org>
+
+	* README.textile: The grammar again
+
+2012-08-25  rocky <rocky@gnu.org>
+
+	* README.textile: The grammar again
+
+2012-08-25  rocky <rocky@gnu.org>
+
+	* README.textile: The grammar again
+
+2012-08-25  rocky <rocky@gnu.org>
+
+	* README.textile: See above
+
+2012-08-25  rocky <rocky@gnu.org>
+
+	* README.textile: textile doesn't do backtick.
+
+2012-08-25  rocky <rocky@gnu.org>
+
+	* Makefile.am, README.textile, example/gcd.el, example/test-gcd.el: 
+	Add a simple example showing how to use.
+
+2012-06-17  rocky <rocky@gnu.org>
+
+	* : commit 56bf795427329ff51afdfe216348ef08314f9446 Author: rocky
+	<rocky@gnu.org> Date:   Sun Jun 17 06:39:24 2012 -0400
+
+2012-06-15  rocky <rocky@gnu.org>
+
+	* test-simple.el: See what happens with TAP output.
+
+2012-06-15  rocky <rocky@gnu.org>
+
+	* README.textile: Correct textile markup
+
+2012-06-15  rocky <rocky@gnu.org>
+
+	* README.textile: Fill in a little more.
+
+2012-06-14  rocky <rocky@gnu.org>
+
+	* README.textile: Update what's afoot
+
+2012-06-14  rocky <rocky@gnu.org>
+
+	* README.textile: Update what's afoot
+
+2012-06-14  rocky <rocky@gnu.org>
+
+	* Makefile.am, test-simple.el, test/basic.el, test/fns.el,
+	test/test-basic.el, test/test-fns.el, test/test-no-clear.el: 
+	test-simple no longer requires (test-simple-start). Just start.
+	Straighten out Makefile system for making tests/checks.
+
+2012-06-10  rocky <rocky@gnu.org>
+
+	* : commit b3485db554d15dce6e5fa8b7c3e77fe01ab57b0c Author: rocky
+	<rocky@gnu.org> Date:   Sun Jun 10 12:48:30 2012 -0400
+
+2012-06-10  rocky <rocky@gnu.org>
+
+	* test-simple.el: Insert file or buffer name into test info.
+
+2012-06-10  rocky <rocky@gnu.org>
+
+	* test-simple.el, test/basic.el: Add test-eql and test-eq. Small
+	improvement in interactive use.
+
+2012-06-05  rocky <rocky@gnu.org>
+
+	* Makefile.am, common.mk, configure.ac, make-check-filter.rb,
+	test-simple.el, test/.gitignore, test/Makefile.am, test/fns.el: Much
+	improved. "make check-short" added. Give elapsed time in
+	microseconds. test-imple-verbosity controls output verboseness. More
+	normal test output now.
+
+2012-06-04  rocky <rocky@gnu.org>
+
+	* test-simple.el, test/fns.el: "context" -> test-simple-info. Allow
+	passing such a structure.
+
+2012-06-03  rocky <rocky@gnu.org>
+
+	* .gitignore, Makefile.am, test-simple.el, test/basic.el,
+	test/fns.el, test/test-simple-basic.el: Start writing tests for the
+	test framework!
+
+2012-06-03  rocky <rocky@gnu.org>
+
+	* test-simple.el, test/test-simple-basic.el: Rewrite more.
+
+2012-06-02  rocky <rocky@gnu.org>
+
+	* .gitignore, test-simple.el, test/test-simple-basic.el: Not quite
+	working correctly. But closer.
+
+2012-06-02  rocky <rocky@gnu.org>
+
+	* Rework test-unit into something even simpler.
+
