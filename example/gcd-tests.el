@@ -1,4 +1,4 @@
-;;; test-simple.el --- Simple Unit Test Framework for Emacs Lisp
+;;; gcd-tests.el
 ;; Copyright (C) 2015 Free Software Foundation, Inc
 
 ;; Author: Rocky Bernstein <rocky@gnu.org>
