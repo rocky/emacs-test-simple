@@ -3,9 +3,9 @@
 *test-simple.el* is :
 
 * Simple -- no need for context macros, enclosing specifications, or required test tags. But if you want, you still can add custom assert failure messages or add notes before a group of tests.
-* Accommodates both interactive and non-interactive use:
+* Accomodates both interactive and non-interactive use:
   * For interactive use one can use `eval-last-sexp`, `eval-region`, and `eval-buffer`
-  * For non-interactive use run as: `emacs --batch --no-site-file --no-splash --load <test-lisp-code.el>`, or `test-simple-run`
+  * For non-interactive use run as: `emacs --batch --no-site-file --no-splash --load <test-lisp-code.el>`
 
 I use this in my [Debugger front end](https://github.com/rocky/emacs-dbgr).
 
@@ -28,7 +28,7 @@ In file `gcd.el`:
     )
 
 
-In file `gcd-tests.el` in the same directory:
+In file `test-gcd.el` in the same directory:
 
     (require 'test-simple)
     (test-simple-start) ;; Zero counters and start the stop watch.
@@ -51,22 +51,21 @@ In file `gcd-tests.el` in the same directory:
 
     (end-tests) ;; Stop the clock and print a summary
 
-Edit (with Emacs of course) `gcd-tests.el` and run `M-x eval-current-buffer`
+Edit (with Emacs of course) `test-gcd.el` and run `M-x eval-current-buffer`
 
 You should see in buffer `*test-simple*`:
 
-    gcd-tests.el
+    test-gcd.el
     ......
     0 failures in 6 assertions (0.002646 seconds)
 
 Now let's try from a command line:
 
-    $ emacs --batch --no-site-file --no-splash --load gcd-tests.el
+    $ emacs --batch --no-site-file --no-splash --load test-gcd.el
     Loading /src/external-vcs/emacs-test-simple/example/gcd.el (source)...
     *scratch*
     ......
     0 failures in 6 assertions (0.000723 seconds)
-
 
 You can run noninteractive tests inside Emacs by `test-simple-run`.
 Add the following at a test file:
