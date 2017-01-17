@@ -289,13 +289,17 @@ additional message to be displayed."
   (interactive)
   (unless test-info (setq test-info test-simple-info))
   (test-simple-describe-failures test-info)
-  (if noninteractive
-      (progn
-	(switch-to-buffer "*test-simple*")
-	(message "%s" (buffer-substring (point-min) (point-max)))
-	)
-    (switch-to-buffer-other-window "*test-simple*")
-    ))
+  (cond (noninteractive
+         (set-buffer "*test-simple*")
+         (cond ((getenv "USE_TAP")
+                (princ (format "%s\n" (buffer-string)))
+                )
+               (t ;; non-TAP goes to stderr (backwards compatibility)
+              	(message "%s" (buffer-substring (point-min) (point-max)))
+                )))
+        (t ;; interactive
+         (switch-to-buffer-other-window "*test-simple*")
+         )))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Reporting
