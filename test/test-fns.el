@@ -14,7 +14,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see
 ;; <http://www.gnu.org/licenses/>.
-(require 'cl)
+(require 'cl-lib)
 (load-file "../test-simple.el")
 (test-simple-clear)
 
@@ -28,11 +28,11 @@
 (note "Summary information")
 (assert-matches "0 failures in 0 assertions" (test-simple-summary-line test-info)
 		"initial summary")
-(incf (test-info-assert-count test-info))
-(incf (test-info-failure-count test-info))
+(cl-incf (test-info-assert-count test-info))
+(cl-incf (test-info-failure-count test-info))
 (assert-matches "1 failure in 1 assertion" (test-simple-summary-line test-info)
 		"handling singular correctly")
-(incf (test-info-assert-count test-info))
+(cl-incf (test-info-assert-count test-info))
 (assert-matches "1 failure in 2 assertions" (test-simple-summary-line test-info)
 		"back to plural for two assertions")
 

@@ -14,7 +14,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see
 ;; <http://www.gnu.org/licenses/>.
-(require 'cl)
+(require 'cl-lib)
 (load-file "../test-simple.el")
 ;; We don't do this or test-simple-start
 ;; (test-simple-clear)

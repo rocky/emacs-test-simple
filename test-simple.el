@@ -89,15 +89,7 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (byte-compile-disable-warning 'cl-functions)
-  ;; Somehow disabling cl-functions causes the erroneous message:
-  ;;   Warning: the function `reduce' might not be defined at runtime.
-  ;; FIXME: isolate, fix and/or report back to Emacs developers a bug
-  ;; (byte-compile-disable-warning 'unresolved)
-  (require 'cl)
-  )
-(require 'cl)
+(require 'cl-lib)
 
 (defgroup test-simple nil
   "Simple Unit Test Framework for Emacs Lisp"
@@ -125,7 +117,7 @@ If bpr is not installed, fall back to `compile'."
 (defvar test-simple-verbosity 0
   "The greater the number the more verbose output.")
 
-(defstruct test-info
+(cl-defstruct test-info
   description                 ;; description of last group of tests
   (assert-count 0)            ;; total number of assertions run
   (failure-count 0)           ;; total number of failures seen
