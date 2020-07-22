@@ -1,10 +1,10 @@
 ;;; test-simple.el --- Simple Unit Test Framework for Emacs Lisp -*- lexical-binding: t -*-
 ;; Rewritten from Phil Hagelberg's behave.el by rocky
 
-;; Copyright (C) 2015, 2016, 2017 Free Software Foundation, Inc
+;; Copyright (C) 2015, 2016, 2017, 2020 Free Software Foundation, Inc
 
 ;; Author: Rocky Bernstein <rocky@gnu.org>
-;; URL: http://github.com/rocky/emacs-test-simple
+;; URL: https://github.com/rocky/emacs-test-simple
 ;; Keywords: unit-test
 ;; Package-Requires: ((cl-lib "0"))
 ;; Version: 1.3.0
