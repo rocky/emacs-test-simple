@@ -23,9 +23,6 @@ check: $(CHECK_FILES)
 check-short:
 	$(MAKE) check 2>&1  | ruby ../make-check-filter.rb
 
-#: Run all tests via cask
-check-cask: $(EL_GET_CHECK_FILES)
-
 install-lispLISP: $(lisp_LISP) $(ELCFILES)
 
 test-%.run:
