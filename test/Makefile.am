@@ -1,9 +1,13 @@
 include $(top_srcdir)/common.mk
 
-PHONY=check test all
+cask_test_files := test-basic.el test-fns.el test-no-clear.el
+
+EL_GET_CHECK_FILES = $(notdir $(cask_test_files:.el=.elrun))
+
+PHONY=check test all check-elget test-elget help
 EXTRA_DIST=gcd.py gcd.rb
 
-all: 
+all:
 
 #: same thing as "check"
 test: check
@@ -19,11 +23,19 @@ check: $(CHECK_FILES)
 check-short:
 	$(MAKE) check 2>&1  | ruby ../make-check-filter.rb
 
+#: Run all tests via cask
+check-cask: $(EL_GET_CHECK_FILES)
+
+install-lispLISP: $(lisp_LISP) $(ELCFILES)
+
 test-%.run:
-	(cd $(top_srcdir)/test && $(EMACS) --batch --no-site-file --no-splash --load $(@:.run=.el))
+	(cd $(top_srcdir)/test && EMACSLOADPATH=$(EMACSLOADPATH) $(EMACS) --batch --no-site-file --no-splash --load $(@:.run=.el))
 
-# Whatever it is you want to do, it should be forwarded to the 
+#: Run tests
+test-%.elrun:
+	(cd $(top_srcdir)/test && $(EMACS) --batch --no-site-file --no-splash --load $(@:.elrun=.el))
+
+# Whatever it is you want to do, it should be forwarded to the
 # to top-level directories
-%: 
+%:
 	$(MAKE) -C .. $@
-
