@@ -298,12 +298,11 @@ additional message to be displayed."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun test-simple-msg(msg &optional newline)
-  (switch-to-buffer "*test-simple*")
-  (let ((inhibit-read-only t))
+  (with-current-buffer "*test-simple*"
+    (let ((inhibit-read-only t))
     (insert msg)
     (if newline (insert "\n"))
-    (switch-to-buffer nil)
-  ))
+  )))
 
 (defun test-simple--ok-msg (fail-message &optional test-info)
   (unless test-info (setq test-info test-simple-info))
