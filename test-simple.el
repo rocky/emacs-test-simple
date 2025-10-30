@@ -1,13 +1,13 @@
 ;;; test-simple.el --- Simple Unit Test Framework for Emacs Lisp -*- lexical-binding: t -*-
 ;; Rewritten from Phil Hagelberg's behave.el by rocky
 
-;; Copyright (C) 2015, 2016, 2017, 2020 Free Software Foundation, Inc
+;; Copyright (C) 2015, 2016, 2017, 2020, 2025 Free Software Foundation, Inc
 
 ;; Author: Rocky Bernstein <rocky@gnu.org>
 ;; URL: https://github.com/rocky/emacs-test-simple
 ;; Keywords: unit-test
 ;; Package-Requires: ((cl-lib "0"))
-;; Version: 1.3.0
+;; Version: 1.3.1
 
 ;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -95,9 +95,10 @@
   "Simple Unit Test Framework for Emacs Lisp"
   :group 'lisp)
 
-(defcustom test-simple-runner-interface (if (fboundp 'bpr-spawn)
-                                            'bpr-spawn
-                                          'compile)
+(defcustom test-simple-runner-interface
+  (if (fboundp 'bpr-spawn)
+      'bpr-spawn
+    'compile)
   "Function with one string argument when running tests non-interactively.
 Command line started with `emacs --batch' is passed as the argument.
 
@@ -117,12 +118,13 @@ If bpr is not installed, fall back to `compile'."
 (defvar test-simple-verbosity 0
   "The greater the number the more verbose output.")
 
-(cl-defstruct test-info
-  description                 ;; description of last group of tests
-  (assert-count 0)            ;; total number of assertions run
-  (failure-count 0)           ;; total number of failures seen
-  (start-time (current-time)) ;; Time run started
-  )
+(cl-defstruct
+ test-info
+ description ;; description of last group of tests
+ (assert-count 0) ;; total number of assertions run
+ (failure-count 0) ;; total number of failures seen
+ (start-time (current-time)) ;; Time run started
+ )
 
 (defvar test-simple-info (make-test-info)
   "Variable to store testing information for a buffer.")
@@ -130,22 +132,21 @@ If bpr is not installed, fall back to `compile'."
 (defun note (description &optional test-info)
   "Add a name to a group of tests."
   (if (getenv "USE_TAP")
-    (test-simple-msg (format "# %s" description) 't)
+      (test-simple-msg (format "# %s" description) 't)
     (if (> test-simple-verbosity 0)
-	(test-simple-msg (concat "\n" description) 't))
+        (test-simple-msg (concat "\n" description) 't))
     (unless test-info
       (setq test-info test-simple-info))
-    (setf (test-info-description test-info) description)
-    ))
+    (setf (test-info-description test-info) description)))
 
 ;;;###autoload
 (defmacro test-simple-start (&optional test-start-msg)
-  `(test-simple-clear nil
-		      (or ,test-start-msg
-			  (if (and (functionp '__FILE__) (__FILE__))
-			      (file-name-nondirectory (__FILE__))
-			    (buffer-name)))
-		      ))
+  `(test-simple-clear
+    nil
+    (or ,test-start-msg
+        (if (and (functionp '__FILE__) (__FILE__))
+            (file-name-nondirectory (__FILE__))
+          (buffer-name)))))
 
 ;;;###autoload
 (defun test-simple-clear (&optional test-info test-start-msg)
@@ -157,7 +158,8 @@ clears out information from the previous run."
 
   (unless test-info
     (unless test-simple-info
-      (make-variable-buffer-local (defvar test-simple-info (make-test-info))))
+      (make-variable-buffer-local
+       (defvar test-simple-info (make-test-info))))
     (setq test-info test-simple-info))
 
   (setf (test-info-description test-info) "none set")
@@ -169,7 +171,8 @@ clears out information from the previous run."
     (let ((old-read-only inhibit-read-only))
       (setq inhibit-read-only 't)
       (delete-region (point-min) (point-max))
-      (if test-start-msg (insert (format "%s\n" test-start-msg)))
+      (if test-start-msg
+          (insert (format "%s\n" test-start-msg)))
       (setq inhibit-read-only old-read-only)))
   (unless noninteractive
     (message "Test-Simple: test information cleared")))
@@ -179,31 +182,36 @@ clears out information from the previous run."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmacro assert-raises (error-condition body &optional fail-message)
-  (let ((fail-message (or fail-message
-			  (format "assert-raises did not get expected %s"
-				  error-condition))))
-    (list 'condition-case nil
-	  (list 'progn body
-		(list 'assert-t nil fail-message))
-	  (list error-condition '(assert-t t)))))
+  (let ((fail-message
+         (or fail-message
+             (format "assert-raises did not get expected %s"
+                     error-condition))))
+    (list
+     'condition-case
+     nil
+     (list 'progn body (list 'assert-t nil fail-message))
+     (list error-condition '(assert-t t)))))
 
 (defun assert-op (op expected actual &optional fail-message test-info)
   "Expectation is that ACTUAL should be equal to EXPECTED."
-  (unless test-info (setq test-info test-simple-info))
+  (unless test-info
+    (setq test-info test-simple-info))
   (cl-incf (test-info-assert-count test-info))
   (if (not (funcall op actual expected))
       (let* ((fail-message
-	      (if fail-message
-		  (format "Message: %s" fail-message)
-		""))
-	     (expect-message
-	      (format "\n  Expected: %S\n  Got: %S" expected actual))
-	     (test-info-mess
-	      (if (boundp 'test-info)
-		  (test-info-description test-info)
-		"unset")))
-	(test-simple--add-failure (format "assert-%s" op) test-info-mess
-                                  (concat fail-message expect-message)))
+              (if fail-message
+                  (format "Message: %s" fail-message)
+                ""))
+             (expect-message
+              (format "\n  Expected: %S\n  Got: %S" expected actual))
+             (test-info-mess
+              (if (boundp 'test-info)
+                  (test-info-description test-info)
+                "unset")))
+        (test-simple--add-failure
+         (format "assert-%s" op)
+         test-info-mess
+         (concat fail-message expect-message)))
     (test-simple--ok-msg fail-message)))
 
 (defun assert-equal (expected actual &optional fail-message test-info)
@@ -212,31 +220,37 @@ clears out information from the previous run."
 
 (defun assert-eq (expected actual &optional fail-message test-info)
   "Expectation is that ACTUAL should be EQ to EXPECTED."
-  (assert-op 'eql expected actual fail-message test-info))
+  (assert-op 'eq expected actual fail-message test-info))
 
 (defun assert-eql (expected actual &optional fail-message test-info)
   "Expectation is that ACTUAL should be EQL to EXPECTED."
   (assert-op 'eql expected actual fail-message test-info))
 
-(defun assert-matches (expected-regexp actual &optional fail-message test-info)
+(defun assert-matches
+    (expected-regexp actual &optional fail-message test-info)
   "Expectation is that ACTUAL should match EXPECTED-REGEXP."
-  (unless test-info (setq test-info test-simple-info))
+  (unless test-info
+    (setq test-info test-simple-info))
   (cl-incf (test-info-assert-count test-info))
   (if (not (string-match expected-regexp actual))
       (let* ((fail-message
-	      (if fail-message
-		  (format "\n\tMessage: %s" fail-message)
-		""))
-	     (expect-message
-	      (format "\tExpected Regexp: %s\n\tGot:      %s"
-		      expected-regexp actual))
-	     (test-info-mess
-	      (if (boundp 'test-info)
-		  (test-info-description test-info)
-		"unset")))
-	(test-simple--add-failure "assert-equal" test-info-mess
-                                  (concat expect-message fail-message)))
-    (progn (test-simple-msg ".") t)))
+              (if fail-message
+                  (format "\n\tMessage: %s" fail-message)
+                ""))
+             (expect-message
+              (format "\tExpected Regexp: %s\n\tGot:      %s"
+                      expected-regexp actual))
+             (test-info-mess
+              (if (boundp 'test-info)
+                  (test-info-description test-info)
+                "unset")))
+        (test-simple--add-failure
+         "assert-equal"
+         test-info-mess
+         (concat expect-message fail-message)))
+    (progn
+      (test-simple-msg ".")
+      t)))
 
 (defun assert-t (actual &optional fail-message test-info)
   "expectation is that ACTUAL is not nil."
@@ -245,103 +259,118 @@ clears out information from the previous run."
 (defun assert-nil (actual &optional fail-message test-info)
   "expectation is that ACTUAL is nil. FAIL-MESSAGE is an optional
 additional message to be displayed."
-  (unless test-info (setq test-info test-simple-info))
+  (unless test-info
+    (setq test-info test-simple-info))
   (cl-incf (test-info-assert-count test-info))
   (if actual
       (let* ((fail-message
-	      (if fail-message
-		  (format "\n\tMessage: %s" fail-message)
-		""))
-	     (test-info-mess
-	      (if (boundp 'test-simple-info)
-		  (test-info-description test-simple-info)
-		"unset")))
-	(test-simple--add-failure "assert-nil" test-info-mess
-                                  fail-message test-info))
+              (if fail-message
+                  (format "\n\tMessage: %s" fail-message)
+                ""))
+             (test-info-mess
+              (if (boundp 'test-simple-info)
+                  (test-info-description test-simple-info)
+                "unset")))
+        (test-simple--add-failure
+         "assert-nil" test-info-mess fail-message
+         test-info))
     (test-simple--ok-msg fail-message)))
 
-(defun test-simple--add-failure (type test-info-msg fail-msg
-                                      &optional test-info)
-  (unless test-info (setq test-info test-simple-info))
+(defun test-simple--add-failure
+    (type test-info-msg fail-msg &optional test-info)
+  (unless test-info
+    (setq test-info test-simple-info))
   (cl-incf (test-info-failure-count test-info))
   (let ((failure-msg
-	 (format "\nDescription: %s, type %s\n%s" test-info-msg type fail-msg))
-	)
+         (format "\nDescription: %s, type %s\n%s"
+                 test-info-msg
+                 type
+                 fail-msg)))
     (save-excursion
       (test-simple--not-ok-msg fail-msg)
       (test-simple-msg failure-msg 't)
       (unless noninteractive
-	(if test-simple-debug-on-error
-	    (signal 'test-simple-assert-failed failure-msg)
-	  ;;(message failure-msg)
-	  )))))
+        (if test-simple-debug-on-error
+            (signal 'test-simple-assert-failed failure-msg)
+          ;;(message failure-msg)
+          )))))
 
 (defun end-tests (&optional test-info)
   "Give a tally of the tests run."
   (interactive)
-  (unless test-info (setq test-info test-simple-info))
+  (unless test-info
+    (setq test-info test-simple-info))
   (test-simple-describe-failures test-info)
-  (cond (noninteractive
-         (set-buffer "*test-simple*")
-         (cond ((getenv "USE_TAP")
-                (princ (format "%s\n" (buffer-string)))
-                )
-               (t ;; non-TAP goes to stderr (backwards compatibility)
-              	(message "%s" (buffer-substring (point-min) (point-max)))
-                )))
-        (t ;; interactive
-         (switch-to-buffer-other-window "*test-simple*")
-         )))
+  (cond
+   (noninteractive
+    (set-buffer "*test-simple*")
+    (cond
+     ((getenv "USE_TAP")
+      (princ (format "%s\n" (buffer-string))))
+     (t ;; non-TAP goes to stderr (backwards compatibility)
+      (message "%s" (buffer-substring (point-min) (point-max))))))
+   (t ;; interactive
+    (switch-to-buffer-other-window "*test-simple*"))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Reporting
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun test-simple-msg(msg &optional newline)
+(defun test-simple-msg (msg &optional newline)
   (with-current-buffer "*test-simple*"
     (let ((inhibit-read-only t))
-    (insert msg)
-    (if newline (insert "\n"))
-  )))
+      (insert msg)
+      (if newline
+          (insert "\n")))))
 
 (defun test-simple--ok-msg (fail-message &optional test-info)
-  (unless test-info (setq test-info test-simple-info))
-  (let ((msg (if (getenv "USE_TAP")
-		 (if (equal fail-message "")
-		     (format "ok %d\n" (test-info-assert-count test-info))
-		   (format "ok %d - %s\n"
-			   (test-info-assert-count test-info)
-			   fail-message))
-	       ".")))
-      (test-simple-msg msg))
+  (unless test-info
+    (setq test-info test-simple-info))
+  (let ((msg
+         (if (getenv "USE_TAP")
+             (if (equal fail-message "")
+                 (format "ok %d\n" (test-info-assert-count test-info))
+               (format "ok %d - %s\n"
+                       (test-info-assert-count test-info)
+                       fail-message))
+           ".")))
+    (test-simple-msg msg))
   't)
 
 (defun test-simple--not-ok-msg (_fail-message &optional test-info)
-  (unless test-info (setq test-info test-simple-info))
-  (let ((msg (if (getenv "USE_TAP")
-		 (format "not ok %d\n" (test-info-assert-count test-info))
-	       "F")))
-      (test-simple-msg msg))
+  (unless test-info
+    (setq test-info test-simple-info))
+  (let ((msg
+         (if (getenv "USE_TAP")
+             (format "not ok %d\n" (test-info-assert-count test-info))
+           "F")))
+    (test-simple-msg msg))
   nil)
 
-(defun test-simple-summary-line(info)
-  (let*
-      ((failures (test-info-failure-count info))
-       (asserts (test-info-assert-count info))
-       (problems (concat (number-to-string failures) " failure"
-			 (unless (= 1 failures) "s")))
-       (tests (concat (number-to-string asserts) " assertion"
-		      (unless (= 1 asserts) "s")))
-       (elapsed-time (time-since (test-info-start-time info)))
-       )
+(defun test-simple-summary-line (info)
+  (let* ((failures (test-info-failure-count info))
+         (asserts (test-info-assert-count info))
+         (problems
+          (concat
+           (number-to-string failures) " failure"
+           (unless (= 1 failures)
+             "s")))
+         (tests
+          (concat
+           (number-to-string asserts) " assertion"
+           (unless (= 1 asserts)
+             "s")))
+         (elapsed-time (time-since (test-info-start-time info))))
     (if (getenv "USE_TAP")
-	(format "1..%d" asserts)
-      (format "\n%s in %s (%g seconds)" problems tests
-	      (float-time elapsed-time))
-  )))
+        (format "1..%d" asserts)
+      (format "\n%s in %s (%g seconds)"
+              problems
+              tests
+              (float-time elapsed-time)))))
 
-(defun test-simple-describe-failures(&optional test-info)
-  (unless test-info (setq test-info test-simple-info))
+(defun test-simple-describe-failures (&optional test-info)
+  (unless test-info
+    (setq test-info test-simple-info))
   (goto-char (point-max))
   (test-simple-msg (test-simple-summary-line test-info)))
 
@@ -357,24 +386,28 @@ Calling this function interactively, COMMAND-LINE-FORMATS is set above."
   (interactive)
   (setq command-line-formats
         (or command-line-formats
-            (list "emacs -batch -L %s -l %s"
-                  (file-name-directory (locate-library "test-simple.elc"))
-                  buffer-file-name)))
-  (let ((func (lambda ()
-                (interactive)
-                (funcall test-simple-runner-interface
-                         (apply 'format command-line-formats)))))
+            (list
+             "emacs -batch -L %s -l %s"
+             (file-name-directory (locate-library "test-simple.elc"))
+             buffer-file-name)))
+  (let ((func
+         (lambda ()
+           (interactive)
+           (funcall test-simple-runner-interface
+                    (apply 'format command-line-formats)))))
     (global-set-key (kbd test-simple-runner-key) func)
     (funcall func)))
 
 (defun test-simple-noninteractive-kill-emacs-hook ()
   "Emacs exits abnormally when noninteractive test fails."
-  (when (and noninteractive test-simple-info
+  (when (and noninteractive
+             test-simple-info
              (<= 1 (test-info-failure-count test-simple-info)))
     (let (kill-emacs-hook)
-     (kill-emacs 1))))
+      (kill-emacs 1))))
 (when noninteractive
-  (add-hook 'kill-emacs-hook 'test-simple-noninteractive-kill-emacs-hook))
+  (add-hook
+   'kill-emacs-hook 'test-simple-noninteractive-kill-emacs-hook))
 
 
 (provide 'test-simple)
