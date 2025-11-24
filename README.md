@@ -13,43 +13,47 @@ Here is an example found in the [examples directory](https://github.com/rocky/em
 
 In file `gcd.el`:
 
-    (defun gcd(a b)
-      "Greatest Common Divisor of A and B"
-      ;; Make a < b
-      (if (> a b)
-          (let ((c a))
-    	(setq a b)
-    	(setq b c)))
-      (cond
-       ((< a 0) nil)
-       ((or (= 0 (- b a)) (= a 1)) a)
-       (t (gcd (- b a) a))
-       )
-    )
-
+```emacs-lisp
+(defun gcd(a b)
+  "Greatest Common Divisor of A and B"
+  ;; Make a < b
+  (if (> a b)
+      (let ((c a))
+ (setq a b)
+ (setq b c)))
+  (cond
+   ((< a 0) nil)
+   ((or (= 0 (- b a)) (= a 1)) a)
+   (t (gcd (- b a) a))
+   )
+)
+```
 
 In file `test-gcd.el` in the same directory:
 
-    (require 'test-simple)
-    (test-simple-start) ;; Zero counters and start the stop watch.
+```emacs-lisp
+(require 'test-simple)
+(test-simple-start) ;; Zero counters and start the stop watch.
 
-    ;; Use (load-file) below because we want to always to read the source.
-    ;; Also, we don't want no stinking compiled source.
-    (assert-t (load-file "./gcd.el")
-    	  "Can't load gcd.el - are you in the right directory?" )
+;; Use (load-file) below because we want to always to read the source.
+;; Also, we don't want no stinking compiled source.
+(assert-t (load-file "./gcd.el")
+   "Can't load gcd.el - are you in the right directory?" )
 
-    (note "degenerate cases")
+(note "degenerate cases")
 
-    (assert-nil (gcd 5 -1) "using positive numbers")
-    (assert-nil (gcd -4 1) "using positive numbers, switched order")
-    (assert-raises error (gcd "a" 32)
-    	       "Passing a string value should raise an error")
+(assert-nil (gcd 5 -1) "using positive numbers")
+(assert-nil (gcd -4 1) "using positive numbers, switched order")
+(assert-raises error (gcd "a" 32)
+        "Passing a string value should raise an error")
 
-    (note "GCD computations")
-    (assert-equal 1 (gcd 3 5) "gcd(3,5)")
-    (assert-equal 8 (gcd 8 32) "gcd(8,32)")
+(note "GCD computations")
+(assert-equal 1 (gcd 3 5) "gcd(3,5)")
+(assert-equal 8 (gcd 8 32) "gcd(8,32)")
 
-    (end-tests) ;; Stop the clock and print a summary
+(end-tests) ;; Stop the clock and print a summary
+```
+
 
 Edit (with Emacs of course) `test-gcd.el` and run `M-x eval-current-buffer`
 
