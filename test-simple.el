@@ -1,13 +1,13 @@
 ;;; test-simple.el --- Simple Unit Test Framework for Emacs Lisp -*- lexical-binding: t -*-
 ;; Rewritten from Phil Hagelberg's behave.el by rocky
 
-;; Copyright (C) 2015, 2016, 2017, 2020, 2025 Free Software Foundation, Inc
+;; Copyright (C) 2015, 2016, 2017, 2020, 2025, 2026 Free Software Foundation, Inc
 
 ;; Author: Rocky Bernstein <rocky@gnu.org>
 ;; URL: https://github.com/rocky/emacs-test-simple
-;; Keywords: unit-test
-;; Package-Requires: ((cl-lib "0"))
-;; Version: 1.3.1
+;; Package-Requires: ((emacs "24.4") (compat "30.1.0.1"))
+;; Keywords: lisp
+;; Version: 1.3.2
 
 ;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -92,7 +92,7 @@
 (require 'cl-lib)
 
 (defgroup test-simple nil
-  "Simple Unit Test Framework for Emacs Lisp"
+  "Simple Unit Test Framework for Emacs Lisp."
   :group 'lisp)
 
 (defcustom test-simple-runner-interface
@@ -108,7 +108,8 @@ If bpr is not installed, fall back to `compile'."
   :group 'test-simple)
 
 (defcustom test-simple-runner-key "C-x C-z"
-  "Key to run non-interactive test after defining command line by `test-simple-run'."
+  "Key to run non-interactive test after defining command line
+by `test-simple-run'."
   :type 'string
   :group 'test-simple)
 
@@ -130,7 +131,8 @@ If bpr is not installed, fall back to `compile'."
   "Variable to store testing information for a buffer.")
 
 (defun note (description &optional test-info)
-  "Add a name to a group of tests."
+  "Add a name to a group of tests.
+DESCRIPTION is a one-line description of what the test does."
   (if (getenv "USE_TAP")
       (test-simple-msg (format "# %s" description) 't)
     (if (> test-simple-verbosity 0)
@@ -377,9 +379,10 @@ additional message to be displayed."
 ;;;###autoload
 (defun test-simple-run (&rest command-line-formats)
   "Register command line to run tests non-interactively and bind key to run test.
-After calling this function, you can run test by key specified by `test-simple-runner-key'.
+After calling this function, you can run test by key specified
+by `test-simple-runner-key'.
 
-It is preferable to write at the first line of test files as a comment, e.g,
+It is preferable to write at the first line of test files as a comment, e.g.,
 ;;;; (test-simple-run \"emacs -batch -L %s -l %s\" (file-name-directory (locate-library \"test-simple.elc\")) buffer-file-name)
 
 Calling this function interactively, COMMAND-LINE-FORMATS is set above."
