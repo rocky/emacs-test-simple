@@ -1,5 +1,5 @@
 ;;; test-simple.el --- Simple Unit Test Framework for Emacs Lisp
-;; Copyright (C) 2015 Free Software Foundation, Inc
+;; Copyright (C) 2015, 2026 Free Software Foundation, Inc
 ;; Author: Rocky Bernstein <rocky@gnu.org>
 ;; This program is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -14,8 +14,14 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see
 ;; <http://www.gnu.org/licenses/>.
+
+;; Press C-x C-e at the end of the next line to run this file test non-interactively
+;; (test-simple-run "emacs -batch -L %s -l %s" (file-name-directory (locate-library "test-simple.elc")) buffer-file-name)
+
 (require 'cl-lib)
 (load-file "../test-simple.el")
+(get-buffer-create "*test-simple*")
+
 (test-simple-start "test-simple.el")
 
 (note "basic-tests")

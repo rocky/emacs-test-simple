@@ -88,6 +88,9 @@
 (require 'time-date)
 
 ;;; Code:
+;; Press C-x C-e at the end of the next line configure the program in
+;; for building via "make" to get set up.
+;; (compile (format "EMACSLOADPATH=:%s ./autogen.sh" (file-name-directory (locate-library "test-simple.elc")) ))
 
 (require 'cl-lib)
 
